@@ -89,7 +89,9 @@ if __name__ == "__main__":
     df_1_reset.columns = ['technology'] + df_1_reset.columns[1:].tolist()
 
     # Filter the DataFrame to get only vanadium_redox_flow_battery power values
-    filtered_df = df_1_reset.loc[df_1_reset['technology'].str.strip() == 'vanadium_redox_flow_battery']
+    #filtered_df = df_1_reset.loc[df_1_reset['technology'].str.strip() == 'vanadium_redox_flow_battery']
+    filtered_df = df_1_reset.loc[(df_1_reset['technology'].str.strip() == 'vanadium_redox_flow_battery') &
+                                 (df_1_reset['capacity_type'] == 'power')]
 
     # Create a new DataFrame in the desired format
     existing_capacity_df = pd.DataFrame({
@@ -110,8 +112,9 @@ if __name__ == "__main__":
     df_1_reset.columns = ['technology'] + df_1_reset.columns[1:].tolist()
 
     # Filter the DataFrame to get only vanadium_redox_flow_battery power values
-    filtered_df = df_1_reset.loc[df_1_reset['technology'].str.strip() == 'vanadium_redox_flow_battery']
-
+    #filtered_df = df_1_reset.loc[df_1_reset['technology'].str.strip() == 'vanadium_redox_flow_battery']
+    filtered_df = df_1_reset.loc[(df_1_reset['technology'].str.strip() == 'vanadium_redox_flow_battery') &
+                                 (df_1_reset['capacity_type'] == 'energy')]
     # Create a new DataFrame in the desired format
     existing_capacity_df = pd.DataFrame({
         'node': filtered_df['location'],

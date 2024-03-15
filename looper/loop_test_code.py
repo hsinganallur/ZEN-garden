@@ -100,6 +100,27 @@ if __name__ == "__main__":
 
     # Save the new DataFrame as a CSV file inside the vanadium_redox_flow_battery folder
     existing_capacity_path = "C:/GitHub/ZEN-garden/data/looping_test_folder/set_technologies/set_storage_technologies/vanadium_redox_flow_battery"
-    fn_exp = 'exisiting_capacity.csv'
+    fn_exp = 'capacity_existing.csv'
     existing_capacity_path = os.path.join(existing_capacity_path,fn_exp)
-    existing_capacity_df.to_csv(existing_capacity_path, index=True)
+    existing_capacity_df.to_csv(existing_capacity_path, index=False)
+
+    # New Tests
+    # Reset indexes and set the first column as 'technology'
+    df_1_reset = df_1.reset_index()
+    df_1_reset.columns = ['technology'] + df_1_reset.columns[1:].tolist()
+
+    # Filter the DataFrame to get only vanadium_redox_flow_battery power values
+    filtered_df = df_1_reset.loc[df_1_reset['technology'].str.strip() == 'vanadium_redox_flow_battery']
+
+    # Create a new DataFrame in the desired format
+    existing_capacity_df = pd.DataFrame({
+        'node': filtered_df['location'],
+        'year_construction': filtered_df['year'],
+        'capacity_existing': filtered_df['none']
+    })
+
+    # Save the new DataFrame as a CSV file inside the vanadium_redox_flow_battery folder
+    existing_capacity_path = "C:/GitHub/ZEN-garden/data/looping_test_folder/set_technologies/set_storage_technologies/vanadium_redox_flow_battery"
+    fn_exp = 'capacity_existing_energy.csv'
+    existing_capacity_path = os.path.join(existing_capacity_path,fn_exp)
+    existing_capacity_df.to_csv(existing_capacity_path, index=False)

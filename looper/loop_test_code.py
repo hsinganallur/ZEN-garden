@@ -76,10 +76,10 @@ if __name__ == "__main__":
     #fp_6 = os.path.join(storage_path, fn_6)
 
     # Save the DataFrame as a CSV file in the specified directory
-    df_1.to_csv(fp_1, index=True)
-    df_2.to_csv(fp_2, index=True)
-    df_3.to_csv(fp_3, index=True)
-    df_4.to_csv(fp_4, index=True)
+    df_1.to_csv(fp_1, index=True, mode = 'w')
+    df_2.to_csv(fp_2, index=True, mode = 'w')
+    df_3.to_csv(fp_3, index=True, mode = 'w')
+    df_4.to_csv(fp_4, index=True, mode = 'w')
     #df_5.to_csv(fp_5, index=False)
     #df_6.tocsv(fp_6, index=False)
 
@@ -104,7 +104,7 @@ if __name__ == "__main__":
     existing_capacity_path = "C:/GitHub/ZEN-garden/data/looping_test_folder/set_technologies/set_storage_technologies/vanadium_redox_flow_battery"
     fn_exp = 'capacity_existing.csv'
     existing_capacity_path = os.path.join(existing_capacity_path,fn_exp)
-    existing_capacity_df.to_csv(existing_capacity_path, index=False)
+    existing_capacity_df.to_csv(existing_capacity_path, index=False, mode='w')
 
     # New Tests
     # Reset indexes and set the first column as 'technology'
@@ -126,4 +126,4 @@ if __name__ == "__main__":
     existing_capacity_path = "C:/GitHub/ZEN-garden/data/looping_test_folder/set_technologies/set_storage_technologies/vanadium_redox_flow_battery"
     fn_exp = 'capacity_existing_energy.csv'
     existing_capacity_path = os.path.join(existing_capacity_path,fn_exp)
-    existing_capacity_df.to_csv(existing_capacity_path, index=False)
+    existing_capacity_df.to_csv(existing_capacity_path, index=False, mode='w')

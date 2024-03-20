@@ -36,7 +36,6 @@ config_file = "C:\GitHub\ZEN-garden\data\config.py"
 dataset_path = "C:\GitHub\ZEN-garden\data\looping_test_folder"
 results_path = "C:\GitHub\ZEN-garden\data\outputs\looping_test_folder"
 storage_path = "C:\GitHub\ZEN-garden\looper\storage_test_folder"
-destination_path = "C:\GitHub\ZEN-garden\looper\storage_test_folder"
 
 # Read parameters from system variable
 reference_year = system["reference_year"]
@@ -153,6 +152,7 @@ for i, year in enumerate(years_of_operation, start=1):
     existing_capacity_df.to_csv(existing_capacity_path, index=False, mode='w')
 
     #Move the result folder to make space for the next Run
+    destination_path = "C:\GitHub\ZEN-garden\looper\storage_test_folder"
     destination_path = os.path.join(destination_path, f"Run {i}")
     # Create a new folder for each run
     os.makedirs(destination_path, exist_ok=True)

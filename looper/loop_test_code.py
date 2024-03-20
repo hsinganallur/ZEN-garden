@@ -3,6 +3,17 @@ import read_results
 import pandas as pd
 import os
 
+import sys
+
+# Add the directory containing system.py to the Python path
+sys.path.append("C:\GitHub\ZEN-garden\data\looping_test_folder")
+
+# Now you can import system from system.py
+from system import system
+
+def get_years_of_operation(reference_year, optimized_years, interval_between_years):
+    return [reference_year + i * interval_between_years for i in range(optimized_years)]
+
 def run_zen_garden(config_file="./config.py", dataset=None, job_index=None):
     # Construct the command to run the ZEN-Garden module
     command = ["python", "-m", "zen_garden", "--config", config_file]
@@ -22,6 +33,15 @@ def run_zen_garden(config_file="./config.py", dataset=None, job_index=None):
 
 
 if __name__ == "__main__":
+    # Read parameters from system variable
+    reference_year = system["reference_year"]
+    optimized_years = system["optimized_years"]
+    interval_between_years = system["interval_between_years"]
+
+    # Calculate years of operation
+    years_of_operation = get_years_of_operation(reference_year, optimized_years, interval_between_years)
+    #print("Years of operation:", years_of_operation)
+
     # Specify the configuration file, dataset, and job index if needed
     config_file = "C:\GitHub\ZEN-garden\data\config.py"
     dataset_path = "C:\GitHub\ZEN-garden\data\looping_test_folder"

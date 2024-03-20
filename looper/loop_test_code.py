@@ -131,7 +131,7 @@ for i, year in enumerate(years_of_operation, start=1):
     existing_capacity_path = os.path.join(existing_capacity_path,fn_exp)
     existing_capacity_df.to_csv(existing_capacity_path, index=False, mode='w')
 
-    """# Reset indexes and set the first column as 'technology'
+   # Reset indexes and set the first column as 'technology'
     df_1_reset = df_1.reset_index()
     df_1_reset.columns = ['technology'] + df_1_reset.columns[1:].tolist()
 
@@ -143,14 +143,14 @@ for i, year in enumerate(years_of_operation, start=1):
     existing_capacity_df = pd.DataFrame({
         'node': filtered_df['location'],
         'year_construction': years_of_operation_corrected,
-        'capacity_existing': filtered_df['none']
+        'capacity_existing_energy': filtered_df['none']
     })
 
     # Save the new DataFrame as a CSV file inside the vanadium_redox_flow_battery folder
     existing_capacity_path = "C:/GitHub/ZEN-garden/data/looping_test_folder/set_technologies/set_storage_technologies/vanadium_redox_flow_battery"
     fn_exp = 'capacity_existing_energy.csv'
     existing_capacity_path = os.path.join(existing_capacity_path,fn_exp)
-    existing_capacity_df.to_csv(existing_capacity_path, index=False, mode='w')"""
+    existing_capacity_df.to_csv(existing_capacity_path, index=False, mode='w')
 
     #Move the result folder to make space for the next Run
     destination_path = os.path.join(destination_path, f"Run {i}")

@@ -2,7 +2,7 @@ import subprocess
 import read_results
 import pandas as pd
 import os
-
+import shutil
 import sys
 
 # Add the directory containing system.py to the Python path
@@ -154,3 +154,7 @@ if __name__ == "__main__":
     fn_exp = 'capacity_existing_energy.csv'
     existing_capacity_path = os.path.join(existing_capacity_path,fn_exp)
     existing_capacity_df.to_csv(existing_capacity_path, index=False, mode='w')
+
+    #Move the result folder to make space for the next Run
+    destination_path = r'C:\GitHub\ZEN-garden\looper\storage_test_folder\Run 1'
+    shutil.move(results_path, destination_path)

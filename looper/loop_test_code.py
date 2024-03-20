@@ -31,34 +31,35 @@ def run_zen_garden(config_file="./config.py", dataset=None, job_index=None):
     #component_name = "capacity"
     #dataframe = results.get_df(component_name)
 
+# Specify the configuration file, if needed
+config_file = "C:\GitHub\ZEN-garden\data\config.py"
+dataset_path = "C:\GitHub\ZEN-garden\data\looping_test_folder"
+results_path = "C:\GitHub\ZEN-garden\data\outputs\looping_test_folder"
+storage_path = "C:\GitHub\ZEN-garden\looper\storage_test_folder"
+destination_path = "C:\GitHub\ZEN-garden\looper\storage_test_folder"
 
-if __name__ == "__main__":
-    # Read parameters from system variable
-    reference_year = system["reference_year"]
-    optimized_years = system["optimized_years"]
-    interval_between_years = system["interval_between_years"]
+# Read parameters from system variable
+reference_year = system["reference_year"]
+optimized_years = system["optimized_years"]
+interval_between_years = system["interval_between_years"]
 
-    # Calculate years of operation
-    years_of_operation = get_years_of_operation(reference_year, optimized_years, interval_between_years)
-    #print("Years of operation:", years_of_operation)
+# Calculate years of operation
+years_of_operation = get_years_of_operation(reference_year, optimized_years, interval_between_years)
+#print("Years of operation:", years_of_operation)
 
-    #Extend it for the number of nodes
-    # Count the number of set_nodes
-    num_set_nodes = len(system["set_nodes"])
+#Extend it for the number of nodes
+# Count the number of set_nodes
+num_set_nodes = len(system["set_nodes"])
 
-    # Repeat years_of_operation for num_set_nodes times
-    years_of_operation_corrected = years_of_operation * num_set_nodes
+# Repeat years_of_operation for num_set_nodes times
+years_of_operation_corrected = years_of_operation * num_set_nodes
 
-    # Specify the configuration file, dataset, and job index if needed
-    config_file = "C:\GitHub\ZEN-garden\data\config.py"
-    dataset_path = "C:\GitHub\ZEN-garden\data\looping_test_folder"
-    #job_index = "your_job_index"
+for i, year in enumerate(years_of_operation, start=1):
+    print(f"Running iteration {i}...")
 
     # Run ZEN-Garden module
     run_zen_garden(config_file, dataset_path)
-
     # Analyze results
-    results_path = "C:\GitHub\ZEN-garden\data\outputs\looping_test_folder"
     r = read_results.Results(results_path)
 
     cn_1 = "capacity"
@@ -79,15 +80,12 @@ if __name__ == "__main__":
     #df_5 = pd.DataFrame(df_5)
     #df_6 = pd.DataFrame(df_6)
 
-    # Store results
-    storage_path = "C:\GitHub\ZEN-garden\looper\storage_test_folder"
-
     # Create Run folder
-    run_path = os.path.join(storage_path, f"Run {1}")
-
+    run_path = os.path.join(storage_path, f"Run {i}")
     # Create a new folder for each run
     os.makedirs(run_path, exist_ok=True)
 
+    # Store results
     fn_1 = 'capacity.csv'
     fn_2 = 'storage_level.csv'
     fn_3 = 'flow_storage_charge.csv'
@@ -133,8 +131,7 @@ if __name__ == "__main__":
     existing_capacity_path = os.path.join(existing_capacity_path,fn_exp)
     existing_capacity_df.to_csv(existing_capacity_path, index=False, mode='w')
 
-    # New Tests
-    # Reset indexes and set the first column as 'technology'
+    """# Reset indexes and set the first column as 'technology'
     df_1_reset = df_1.reset_index()
     df_1_reset.columns = ['technology'] + df_1_reset.columns[1:].tolist()
 
@@ -153,8 +150,12 @@ if __name__ == "__main__":
     existing_capacity_path = "C:/GitHub/ZEN-garden/data/looping_test_folder/set_technologies/set_storage_technologies/vanadium_redox_flow_battery"
     fn_exp = 'capacity_existing_energy.csv'
     existing_capacity_path = os.path.join(existing_capacity_path,fn_exp)
-    existing_capacity_df.to_csv(existing_capacity_path, index=False, mode='w')
+    existing_capacity_df.to_csv(existing_capacity_path, index=False, mode='w')"""
 
     #Move the result folder to make space for the next Run
-    destination_path = r'C:\GitHub\ZEN-garden\looper\storage_test_folder\Run 1'
+    destination_path = os.path.join(destination_path, f"Run {i}")
+    # Create a new folder for each run
+    os.makedirs(destination_path, exist_ok=True)
     shutil.move(results_path, destination_path)
+
+print(f"External loop ran for {len(years_of_operation)} successful iterations")

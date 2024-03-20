@@ -42,6 +42,13 @@ if __name__ == "__main__":
     years_of_operation = get_years_of_operation(reference_year, optimized_years, interval_between_years)
     #print("Years of operation:", years_of_operation)
 
+    #Extend it for the number of nodes
+    # Count the number of set_nodes
+    num_set_nodes = len(system["set_nodes"])
+
+    # Repeat years_of_operation for num_set_nodes times
+    years_of_operation_corrected = years_of_operation * num_set_nodes
+
     # Specify the configuration file, dataset, and job index if needed
     config_file = "C:\GitHub\ZEN-garden\data\config.py"
     dataset_path = "C:\GitHub\ZEN-garden\data\looping_test_folder"
@@ -116,7 +123,7 @@ if __name__ == "__main__":
     # Create a new DataFrame in the desired format
     existing_capacity_df = pd.DataFrame({
         'node': filtered_df['location'],
-        'year_construction': filtered_df['year'],
+        'year_construction': years_of_operation_corrected,
         'capacity_existing': filtered_df['none']
     })
 
@@ -138,7 +145,7 @@ if __name__ == "__main__":
     # Create a new DataFrame in the desired format
     existing_capacity_df = pd.DataFrame({
         'node': filtered_df['location'],
-        'year_construction': filtered_df['year'],
+        'year_construction': years_of_operation_corrected,
         'capacity_existing': filtered_df['none']
     })
 

@@ -109,13 +109,13 @@ for i, year in enumerate(years_of_operation, start=1):
 
     # New Tests
     # Reset indexes and set the first column as 'technology'
-    df_1_reset = df_1.reset_index()
-    df_1_reset.columns = ['technology'] + df_1_reset.columns[1:].tolist()
+    df_1_reset_power = df_1.reset_index()
+    df_1_reset_power.columns = ['technology'] + df_1_reset_power.columns[1:].tolist()
 
     # Filter the DataFrame to get only vanadium_redox_flow_battery power values
     #filtered_df = df_1_reset.loc[df_1_reset['technology'].str.strip() == 'vanadium_redox_flow_battery']
-    filtered_df = df_1_reset.loc[(df_1_reset['technology'].str.strip() == 'vanadium_redox_flow_battery') &
-                                 (df_1_reset['capacity_type'] == 'power')]
+    filtered_df = df_1_reset_power.loc[(df_1_reset_power['technology'].str.strip() == 'vanadium_redox_flow_battery') &
+                                 (df_1_reset_power['capacity_type'] == 'power')]
 
     # Create a new DataFrame in the desired format
     existing_capacity_df = pd.DataFrame({
@@ -131,13 +131,13 @@ for i, year in enumerate(years_of_operation, start=1):
     existing_capacity_df.to_csv(existing_capacity_path, index=False, mode='w')
 
    # Reset indexes and set the first column as 'technology'
-    df_1_reset = df_1.reset_index()
-    df_1_reset.columns = ['technology'] + df_1_reset.columns[1:].tolist()
+    df_1_reset_capacity = df_1.reset_index()
+    df_1_reset_capacity.columns = ['technology'] + df_1_reset_capacity.columns[1:].tolist()
 
     # Filter the DataFrame to get only vanadium_redox_flow_battery power values
     #filtered_df = df_1_reset.loc[df_1_reset['technology'].str.strip() == 'vanadium_redox_flow_battery']
-    filtered_df = df_1_reset.loc[(df_1_reset['technology'].str.strip() == 'vanadium_redox_flow_battery') &
-                                 (df_1_reset['capacity_type'] == 'energy')]
+    filtered_df = df_1_reset_capacity.loc[(df_1_reset_capacity['technology'].str.strip() == 'vanadium_redox_flow_battery') &
+                                 (df_1_reset_capacity['capacity_type'] == 'energy')]
     # Create a new DataFrame in the desired format
     existing_capacity_df = pd.DataFrame({
         'node': filtered_df['location'],

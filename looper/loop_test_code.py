@@ -71,9 +71,9 @@ for i, year in enumerate(years_of_operation, start=1):
     df_1 = pd.DataFrame(df_1)
     df_2 = r.get_df(cn_2)
     df_2 = pd.DataFrame(df_2)
-    df_3 = r.get_df(cn_3)
+    df_3 = r.get_total(cn_3)
     df_3 = pd.DataFrame(df_3)
-    df_4 = r.get_df(cn_4)
+    df_4 = r.get_total(cn_4)
     df_4 = pd.DataFrame(df_4)
     #df_5 = r.get_df(cn_5)
     #df_5 = pd.DataFrame(df_5)
@@ -107,13 +107,40 @@ for i, year in enumerate(years_of_operation, start=1):
     #df_5.to_csv(fp_5, index=False)
     #df_6.tocsv(fp_6, index=False)
 
-    # New Tests
+    #################################################### New Tests ####################################################
+    df_3_reset_charge = df_3.reset_index()
+    df_3_reset_charge.columns = ['technology'] + df_3_reset_charge.columns[1:].tolist()
+    charge_df = df_3_reset_charge.loc[(df_3_reset_charge['technology'].str.strip() == 'vanadium_redox_flow_battery')]
+
+    print("Charge DataFrame before summing:")
+    print(charge_df.head())
+
+    df_4_reset_discharge = df_4.reset_index()
+    df_4_reset_discharge.columns = ['technology'] + df_4_reset_discharge.columns[1:].tolist()
+    discharge_df = df_4_reset_discharge.loc[(df_4_reset_discharge['technology'].str.strip() == 'vanadium_redox_flow_battery')]
+
+    print("Discharge DataFrame before summing:")
+    print(discharge_df.head())
+
+    # Combine charge and discharge dataframes into one dataframe
+    charge_discharge_df = charge_df.merge(discharge_df, on=['technology', 'node'])
+    # Define columns to sum
+    cols_to_sum = charge_df.columns[2:]
+
+    # Sum the corresponding charge and discharge values for each node and each time step
+    for col in cols_to_sum:
+        charge_discharge_df[col] = charge_df[col] + discharge_df[col]
+
+    print("Charge-Discharge DataFrame after summing:")
+    print(charge_discharge_df.head())
+
+    #################################################### New Tests End ####################################################
+
     # Reset indexes and set the first column as 'technology'
     df_1_reset_power = df_1.reset_index()
     df_1_reset_power.columns = ['technology'] + df_1_reset_power.columns[1:].tolist()
 
     # Filter the DataFrame to get only vanadium_redox_flow_battery power values
-    #filtered_df = df_1_reset.loc[df_1_reset['technology'].str.strip() == 'vanadium_redox_flow_battery']
     filtered_df = df_1_reset_power.loc[(df_1_reset_power['technology'].str.strip() == 'vanadium_redox_flow_battery') &
                                  (df_1_reset_power['capacity_type'] == 'power')]
 
@@ -135,7 +162,6 @@ for i, year in enumerate(years_of_operation, start=1):
     df_1_reset_capacity.columns = ['technology'] + df_1_reset_capacity.columns[1:].tolist()
 
     # Filter the DataFrame to get only vanadium_redox_flow_battery power values
-    #filtered_df = df_1_reset.loc[df_1_reset['technology'].str.strip() == 'vanadium_redox_flow_battery']
     filtered_df = df_1_reset_capacity.loc[(df_1_reset_capacity['technology'].str.strip() == 'vanadium_redox_flow_battery') &
                                  (df_1_reset_capacity['capacity_type'] == 'energy')]
     # Create a new DataFrame in the desired format

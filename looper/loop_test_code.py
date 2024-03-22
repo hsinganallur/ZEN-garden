@@ -224,8 +224,8 @@ for i, year in enumerate(years_of_operation, start=1):
 
     # Save the new DataFrame as a CSV file inside the vanadium_redox_flow_battery folder
     existing_capacity_path = "C:\\GitHub\\ZEN-garden\\data\\looping_test_folder\\set_technologies\\set_storage_technologies\\vanadium_redox_flow_battery"
-    fn_exp = 'capacity_existing.csv'
-    existing_capacity_path = os.path.join(existing_capacity_path,fn_exp)
+    fn_exp_1 = 'capacity_existing.csv'
+    existing_capacity_path = os.path.join(existing_capacity_path,fn_exp_1)
     existing_capacity_df.to_csv(existing_capacity_path, index=False, mode='w')
 
     # Reset indexes and set the first column as 'technology'
@@ -244,8 +244,8 @@ for i, year in enumerate(years_of_operation, start=1):
 
     # Save the new DataFrame as a CSV file inside the vanadium_redox_flow_battery folder
     existing_capacity_path = "C:\\GitHub\\ZEN-garden\\data\\looping_test_folder\\set_technologies\\set_storage_technologies\\vanadium_redox_flow_battery"
-    fn_exp = 'capacity_existing_energy.csv'
-    existing_capacity_path = os.path.join(existing_capacity_path,fn_exp)
+    fn_exp_2 = 'capacity_existing_energy.csv'
+    existing_capacity_path = os.path.join(existing_capacity_path,fn_exp_2)
     existing_capacity_df.to_csv(existing_capacity_path, index=False, mode='w')
 
     #Move the result folder to make space for the next Run

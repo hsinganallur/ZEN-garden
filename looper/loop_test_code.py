@@ -136,6 +136,14 @@ for i, year in enumerate(years_of_operation, start=1):
     charge_discharge_df.drop(
         columns=[col + '_charge' for col in cols_to_sum] + [col + '_discharge' for col in cols_to_sum], inplace=True)
 
+    #Save the generated file
+    fn_5 = 'charge_discharge.csv'
+    fp_5 = os.path.join(run_path, fn_5)
+    charge_discharge_df.to_csv(fp_5, index=False, mode='w')
+
+    #Needs to be changed
+    charge_discharge_df = pd.read_csv(fp_5)
+
     #print("Charge-Discharge DataFrame after summing:")
     #print(charge_discharge_df.head())
 
@@ -156,6 +164,14 @@ for i, year in enumerate(years_of_operation, start=1):
     # Modify Total Capacity DataFrame
     total_capacity_df = total_capacity_df.drop(columns=['capacity_type'])
     total_capacity_df = total_capacity_df.rename(columns={'location': 'node'})
+
+    #Save the generated file
+    fn_6 = 'total_capacity.csv'
+    fp_6 = os.path.join(run_path, fn_6)
+    total_capacity_df.to_csv(fp_6, index=False, mode='w')
+
+    # Needs to be changed
+    total_capacity_df = pd.read_csv(fp_6)
 
     # Strip whitespaces from all columns in total_capacity_df
     total_capacity_df = total_capacity_df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
@@ -199,7 +215,7 @@ for i, year in enumerate(years_of_operation, start=1):
     for col in total_capacity_df.columns[2:]:
         print(f"Processing column: {col}")
         try:
-            number_of_cycles_df[col] = total_capacity_df[col] / (2 * charge_discharge_df[col])
+            number_of_cycles_df[col] = charge_discharge_df[col] / (2 * total_capacity_df[col])
         except KeyError:
             print(f"Column '{col}' not found in charge_discharge_df.")
 

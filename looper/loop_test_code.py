@@ -109,7 +109,8 @@ for i, year in enumerate(years_of_operation, start=1):
     # Reset indexes and set the first column as 'technology'
     df_4_reset_discharge = df_4.reset_index()
     df_4_reset_discharge.columns = ['technology'] + df_4_reset_discharge.columns[1:].tolist()
-    discharge_df = df_4_reset_discharge.loc[(df_4_reset_discharge['technology'].str.strip() == 'vanadium_redox_flow_battery')]
+    discharge_df = df_4_reset_discharge.loc[(df_4_reset_discharge['technology'].str.strip() ==
+                                             'vanadium_redox_flow_battery')]
 
     print("Discharge DataFrame before summing:")
     print(discharge_df.head())

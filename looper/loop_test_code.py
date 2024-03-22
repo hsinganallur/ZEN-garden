@@ -160,7 +160,7 @@ for i, year in enumerate(years_of_operation, start=1):
     df_1_reset_capacity = df_1.reset_index()
     df_1_reset_capacity.columns = ['technology'] + df_1_reset_capacity.columns[1:].tolist()
 
-    # Filter the DataFrame to get only vanadium_redox_flow_battery power values
+    # Filter the DataFrame to get only vanadium_redox_flow_battery energy values
     filtered_df = df_1_reset_capacity.loc[(df_1_reset_capacity['technology'].str.strip() == 'vanadium_redox_flow_battery') &
                                  (df_1_reset_capacity['capacity_type'] == 'energy')]
     # Create a new DataFrame in the desired format

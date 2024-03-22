@@ -141,15 +141,17 @@ for i, year in enumerate(years_of_operation, start=1):
 
     # Reset indexes and set the first column as 'technology'
     df_5_reset_capacity = df_5.reset_index()
+
     #print("Total Capacity dataframe before processing:")
     #print(df_5.head())
+
     df_5_reset_capacity.columns = ['technology'] + df_5_reset_capacity.columns[1:].tolist()
     total_capacity_df = df_5_reset_capacity.loc[(df_5_reset_capacity['technology'].str.strip() ==
                                                  'vanadium_redox_flow_battery') &
                                                 (df_5_reset_capacity['capacity_type'] == 'energy')]
 
-    print("Total Capacity dataframe:")
-    print(total_capacity_df.head())
+    #print("Total Capacity dataframe:")
+    #print(total_capacity_df.head())
 
     # Modify Total Capacity DataFrame
     total_capacity_df = total_capacity_df.drop(columns=['capacity_type'])
@@ -157,7 +159,6 @@ for i, year in enumerate(years_of_operation, start=1):
 
     # Strip whitespaces from all columns in total_capacity_df
     total_capacity_df = total_capacity_df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
-
     # Strip whitespaces from all columns in charge_discharge_df
     charge_discharge_df = charge_discharge_df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
 

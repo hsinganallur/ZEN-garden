@@ -4,13 +4,12 @@ import pandas as pd
 import os
 import shutil
 import sys
-
 # Add the directory containing system.py to the Python path
-sys.path.append("C:\GitHub\ZEN-garden\data\looping_test_folder")
-
-# Now you can import system from system.py
+sys.path.append("C:\\GitHub\\ZEN-garden\\data\\looping_test_folder")
+# Import system from system.py
 from system import system
 
+#################################################### Functions ####################################################
 def get_years_of_operation(reference_year, optimized_years, interval_between_years):
     return [reference_year + i * interval_between_years for i in range(optimized_years)]
 
@@ -27,15 +26,13 @@ def run_zen_garden(config_file="./config.py", dataset=None, job_index=None):
     # Run the ZEN-Garden module
     subprocess.run(command)
 
-    #Example: Get the dataframe for a specific component
-    #component_name = "capacity"
-    #dataframe = results.get_df(component_name)
+#################################################### Functions ####################################################
 
 # Specify the configuration file, if needed
-config_file = "C:\GitHub\ZEN-garden\data\config.py"
-dataset_path = "C:\GitHub\ZEN-garden\data\looping_test_folder"
-results_path = "C:\GitHub\ZEN-garden\data\outputs\looping_test_folder"
-storage_path = "C:\GitHub\ZEN-garden\looper\storage_test_folder"
+config_file = "C:\\GitHub\\ZEN-garden\\data\\config.py"
+dataset_path = "C:\\GitHub\\ZEN-garden\\data\\looping_test_folder"
+results_path = "C:\\GitHub\\ZEN-garden\\data\\outputs\\looping_test_folder"
+storage_path = "C:\\GitHub\\ZEN-garden\\looper\\storage_test_folder"
 
 # Read parameters from system variable
 reference_year = system["reference_year"]
@@ -46,27 +43,28 @@ interval_between_years = system["interval_between_years"]
 years_of_operation = get_years_of_operation(reference_year, optimized_years, interval_between_years)
 #print("Years of operation:", years_of_operation)
 
-#Extend it for the number of nodes
+# Extend it for the number of nodes
 # Count the number of set_nodes
 num_set_nodes = len(system["set_nodes"])
 
 # Repeat years_of_operation for num_set_nodes times
 years_of_operation_corrected = years_of_operation * num_set_nodes
 
+#################################################### Running ZEN-garden and outputting results ####################################################
+
 for i, year in enumerate(years_of_operation, start=1):
     print(f"Running iteration {i}...")
 
-    # Run ZEN-Garden module
+    # Setting up and solving optimization problem in ZEN-Garden module
     run_zen_garden(config_file, dataset_path)
-    # Analyze results
+    # Analyzing results
     r = read_results.Results(results_path)
 
     cn_1 = "capacity"
     cn_2 = "storage_level"
     cn_3 = "flow_storage_charge"
     cn_4 = "flow_storage_discharge"
-    #cn_5 = "tech_on_var"
-    #cn_6 = "tech_off_var"
+
     df_1 = r.get_df(cn_1)
     df_1 = pd.DataFrame(df_1)
     df_2 = r.get_df(cn_2)
@@ -75,9 +73,6 @@ for i, year in enumerate(years_of_operation, start=1):
     df_3 = pd.DataFrame(df_3)
     df_4 = r.get_total(cn_4)
     df_4 = pd.DataFrame(df_4)
-    #df_5 = r.get_df(cn_5)
-    #df_5 = pd.DataFrame(df_5)
-    #df_6 = pd.DataFrame(df_6)
 
     # Create Run folder
     run_path = os.path.join(storage_path, f"Run {i}")
@@ -89,25 +84,21 @@ for i, year in enumerate(years_of_operation, start=1):
     fn_2 = 'storage_level.csv'
     fn_3 = 'flow_storage_charge.csv'
     fn_4 = 'flow_storage_discharge.csv'
-    #fn_5 = 'tech_on_var.csv'
-    #fn_6 = 'tech_off_var.csv'
 
     fp_1 = os.path.join(run_path, fn_1)
     fp_2 = os.path.join(run_path, fn_2)
     fp_3 = os.path.join(run_path, fn_3)
     fp_4 = os.path.join(run_path, fn_4)
-    #fp_5 = os.path.join(storage_path, fn_5)
-    #fp_6 = os.path.join(storage_path, fn_6)
 
     # Save the DataFrame as a CSV file in the specified directory
-    df_1.to_csv(fp_1, index=True, mode = 'w')
-    df_2.to_csv(fp_2, index=True, mode = 'w')
-    df_3.to_csv(fp_3, index=True, mode = 'w')
-    df_4.to_csv(fp_4, index=True, mode = 'w')
-    #df_5.to_csv(fp_5, index=False)
-    #df_6.tocsv(fp_6, index=False)
+    df_1.to_csv(fp_1, index=True, mode='w')
+    df_2.to_csv(fp_2, index=True, mode='w')
+    df_3.to_csv(fp_3, index=True, mode='w')
+    df_4.to_csv(fp_4, index=True, mode='w')
 
-    #################################################### New Tests ####################################################
+    # Calculating number of cycles at each node and each node of operation
+
+    # Reset indexes and set the first column as 'technology'
     df_3_reset_charge = df_3.reset_index()
     df_3_reset_charge.columns = ['technology'] + df_3_reset_charge.columns[1:].tolist()
     charge_df = df_3_reset_charge.loc[(df_3_reset_charge['technology'].str.strip() == 'vanadium_redox_flow_battery')]
@@ -115,6 +106,7 @@ for i, year in enumerate(years_of_operation, start=1):
     print("Charge DataFrame before summing:")
     print(charge_df.head())
 
+    # Reset indexes and set the first column as 'technology'
     df_4_reset_discharge = df_4.reset_index()
     df_4_reset_discharge.columns = ['technology'] + df_4_reset_discharge.columns[1:].tolist()
     discharge_df = df_4_reset_discharge.loc[(df_4_reset_discharge['technology'].str.strip() == 'vanadium_redox_flow_battery')]
@@ -125,7 +117,7 @@ for i, year in enumerate(years_of_operation, start=1):
     # Combine charge and discharge dataframes into one dataframe
     charge_discharge_df = charge_df.merge(discharge_df, on=['technology', 'node'], suffixes=('_charge', '_discharge'))
 
-    print("Discharge DataFrame before summing:")
+    print("Charge-Discharge DataFrame before summing:")
     print(charge_discharge_df.head())
 
     # Define columns to sum
@@ -142,15 +134,13 @@ for i, year in enumerate(years_of_operation, start=1):
     print("Charge-Discharge DataFrame after summing:")
     print(charge_discharge_df.head())
 
-    #################################################### New Tests End ####################################################
-
     # Reset indexes and set the first column as 'technology'
     df_1_reset_power = df_1.reset_index()
     df_1_reset_power.columns = ['technology'] + df_1_reset_power.columns[1:].tolist()
 
     # Filter the DataFrame to get only vanadium_redox_flow_battery power values
     filtered_df = df_1_reset_power.loc[(df_1_reset_power['technology'].str.strip() == 'vanadium_redox_flow_battery') &
-                                 (df_1_reset_power['capacity_type'] == 'power')]
+                                       (df_1_reset_power['capacity_type'] == 'power')]
 
     # Create a new DataFrame in the desired format
     existing_capacity_df = pd.DataFrame({
@@ -160,12 +150,12 @@ for i, year in enumerate(years_of_operation, start=1):
     })
 
     # Save the new DataFrame as a CSV file inside the vanadium_redox_flow_battery folder
-    existing_capacity_path = "C:/GitHub/ZEN-garden/data/looping_test_folder/set_technologies/set_storage_technologies/vanadium_redox_flow_battery"
+    existing_capacity_path = "C:\\GitHub\\ZEN-garden\\data\\looping_test_folder\\set_technologies\\set_storage_technologies\\vanadium_redox_flow_battery"
     fn_exp = 'capacity_existing.csv'
     existing_capacity_path = os.path.join(existing_capacity_path,fn_exp)
     existing_capacity_df.to_csv(existing_capacity_path, index=False, mode='w')
 
-   # Reset indexes and set the first column as 'technology'
+    # Reset indexes and set the first column as 'technology'
     df_1_reset_capacity = df_1.reset_index()
     df_1_reset_capacity.columns = ['technology'] + df_1_reset_capacity.columns[1:].tolist()
 
@@ -180,16 +170,18 @@ for i, year in enumerate(years_of_operation, start=1):
     })
 
     # Save the new DataFrame as a CSV file inside the vanadium_redox_flow_battery folder
-    existing_capacity_path = "C:/GitHub/ZEN-garden/data/looping_test_folder/set_technologies/set_storage_technologies/vanadium_redox_flow_battery"
+    existing_capacity_path = "C:\\GitHub\\ZEN-garden\\data\\looping_test_folder\\set_technologies\\set_storage_technologies\\vanadium_redox_flow_battery"
     fn_exp = 'capacity_existing_energy.csv'
     existing_capacity_path = os.path.join(existing_capacity_path,fn_exp)
     existing_capacity_df.to_csv(existing_capacity_path, index=False, mode='w')
 
     #Move the result folder to make space for the next Run
-    destination_path = "C:\GitHub\ZEN-garden\looper\storage_test_folder"
+    destination_path = "C:\\GitHub\\ZEN-garden\\looper\\storage_test_folder"
     destination_path = os.path.join(destination_path, f"Run {i}")
     # Create a new folder for each run
     os.makedirs(destination_path, exist_ok=True)
     shutil.move(results_path, destination_path)
+
+#################################################### Running ZEN-garden and outputting results ####################################################
 
 print(f"External loop ran for {len(years_of_operation)} successful iterations")

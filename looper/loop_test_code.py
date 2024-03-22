@@ -73,6 +73,10 @@ for i, year in enumerate(years_of_operation, start=1):
     df_3 = pd.DataFrame(df_3)
     df_4 = r.get_total(cn_4)
     df_4 = pd.DataFrame(df_4)
+    df_5 = r.get_total("capacity")
+    df_5 = pd.DataFrame(df_5)
+    df_6 = r.get_total("capacity")
+    df_6 = pd.DataFrame(df_6)
 
     # Create Run folder
     run_path = os.path.join(storage_path, f"Run {i}")
@@ -103,8 +107,8 @@ for i, year in enumerate(years_of_operation, start=1):
     df_3_reset_charge.columns = ['technology'] + df_3_reset_charge.columns[1:].tolist()
     charge_df = df_3_reset_charge.loc[(df_3_reset_charge['technology'].str.strip() == 'vanadium_redox_flow_battery')]
 
-    print("Charge DataFrame before summing:")
-    print(charge_df.head())
+    #print("Charge DataFrame before summing:")
+    #print(charge_df.head())
 
     # Reset indexes and set the first column as 'technology'
     df_4_reset_discharge = df_4.reset_index()
@@ -112,14 +116,14 @@ for i, year in enumerate(years_of_operation, start=1):
     discharge_df = df_4_reset_discharge.loc[(df_4_reset_discharge['technology'].str.strip() ==
                                              'vanadium_redox_flow_battery')]
 
-    print("Discharge DataFrame before summing:")
-    print(discharge_df.head())
+    #print("Discharge DataFrame before summing:")
+    #print(discharge_df.head())
 
     # Combine charge and discharge dataframes into one dataframe
     charge_discharge_df = charge_df.merge(discharge_df, on=['technology', 'node'], suffixes=('_charge', '_discharge'))
 
-    print("Charge-Discharge DataFrame before summing:")
-    print(charge_discharge_df.head())
+    #print("Charge-Discharge DataFrame before summing:")
+    #print(charge_discharge_df.head())
 
     # Define columns to sum
     cols_to_sum = [col.split("_")[0] for col in charge_discharge_df.columns if col.endswith('_charge')]
@@ -132,9 +136,76 @@ for i, year in enumerate(years_of_operation, start=1):
     charge_discharge_df.drop(
         columns=[col + '_charge' for col in cols_to_sum] + [col + '_discharge' for col in cols_to_sum], inplace=True)
 
-    print("Charge-Discharge DataFrame after summing:")
-    print(charge_discharge_df.head())
+    #print("Charge-Discharge DataFrame after summing:")
+    #print(charge_discharge_df.head())
 
+    # Reset indexes and set the first column as 'technology'
+    df_5_reset_capacity = df_5.reset_index()
+    #print("Total Capacity dataframe before processing:")
+    #print(df_5.head())
+    df_5_reset_capacity.columns = ['technology'] + df_5_reset_capacity.columns[1:].tolist()
+    total_capacity_df = df_5_reset_capacity.loc[(df_5_reset_capacity['technology'].str.strip() ==
+                                                 'vanadium_redox_flow_battery') &
+                                                (df_5_reset_capacity['capacity_type'] == 'energy')]
+
+    print("Total Capacity dataframe:")
+    print(total_capacity_df.head())
+
+    # Modify Total Capacity DataFrame
+    total_capacity_df = total_capacity_df.drop(columns=['capacity_type'])
+    total_capacity_df = total_capacity_df.rename(columns={'location': 'node'})
+
+    # Strip whitespaces from all columns in total_capacity_df
+    total_capacity_df = total_capacity_df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
+
+    # Strip whitespaces from all columns in charge_discharge_df
+    charge_discharge_df = charge_discharge_df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
+
+    # Check if the first two columns are equal for both dataframes
+    first_two_columns_equal = total_capacity_df.iloc[:, :2].equals(charge_discharge_df.iloc[:, :2])
+
+    if first_two_columns_equal:
+        print("The first two columns are equal for both Total Capacity DataFrame and Charge-Discharge DataFrame.")
+    else:
+        print("The first two columns are not equal for both Total Capacity DataFrame and Charge-Discharge DataFrame.")
+        print("Columns and contents of total_capacity_df:")
+        print(total_capacity_df.iloc[:, :2])
+        print("\nColumns and contents of charge_discharge_df:")
+        print(charge_discharge_df.iloc[:, :2])
+
+    # Check the number of columns after the first two in each DataFrame
+    total_capacity_cols_count = len(total_capacity_df.columns[2:])
+    charge_discharge_cols_count = len(charge_discharge_df.columns[2:])
+
+    # Check if the number of columns after the first two is equal
+    columns_count_equal = total_capacity_cols_count == charge_discharge_cols_count
+
+    # Print statements based on the checks
+    if columns_count_equal:
+        print(
+            "The number of columns after the first two in Total Capacity DataFrame is equal to Charge-Discharge DataFrame.")
+    else:
+        print(
+            "The number of columns after the first two in Total Capacity DataFrame is not equal to Charge-Discharge DataFrame.")
+
+    # Create a new DataFrame "number of cycles"
+    number_of_cycles_df = pd.DataFrame({
+        'technology': total_capacity_df['technology'],
+        'node': total_capacity_df['node']
+    })
+
+    # Calculate the values by dividing the corresponding values in the Total Capacity DataFrame by the Charge-Discharge DataFrame
+    for col in total_capacity_df.columns[2:]:
+        print(f"Processing column: {col}")
+        try:
+            number_of_cycles_df[col] = total_capacity_df[col] / (2 * charge_discharge_df[col])
+        except KeyError:
+            print(f"Column '{col}' not found in charge_discharge_df.")
+
+    print("Number of cycles dataframe:")
+    print(number_of_cycles_df.head())
+
+    # Creating csv files of interest for further use if needed
     # Reset indexes and set the first column as 'technology'
     df_1_reset_power = df_1.reset_index()
     df_1_reset_power.columns = ['technology'] + df_1_reset_power.columns[1:].tolist()

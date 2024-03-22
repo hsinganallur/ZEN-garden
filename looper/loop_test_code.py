@@ -123,13 +123,21 @@ for i, year in enumerate(years_of_operation, start=1):
     print(discharge_df.head())
 
     # Combine charge and discharge dataframes into one dataframe
-    charge_discharge_df = charge_df.merge(discharge_df, on=['technology', 'node'])
+    charge_discharge_df = charge_df.merge(discharge_df, on=['technology', 'node'], suffixes=('_charge', '_discharge'))
+
+    print("Discharge DataFrame before summing:")
+    print(charge_discharge_df.head())
+
     # Define columns to sum
-    cols_to_sum = charge_df.columns[2:]
+    cols_to_sum = [col.split("_")[0] for col in charge_discharge_df.columns if col.endswith('_charge')]
 
     # Sum the corresponding charge and discharge values for each node and each time step
     for col in cols_to_sum:
-        charge_discharge_df[col] = charge_df[col] + discharge_df[col]
+        charge_discharge_df[col] = charge_discharge_df[col + '_charge'] + charge_discharge_df[col + '_discharge']
+
+    # Drop the intermediate charge and discharge columns
+    charge_discharge_df.drop(
+        columns=[col + '_charge' for col in cols_to_sum] + [col + '_discharge' for col in cols_to_sum], inplace=True)
 
     print("Charge-Discharge DataFrame after summing:")
     print(charge_discharge_df.head())

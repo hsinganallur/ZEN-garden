@@ -1,47 +1,42 @@
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
+import streamlit as st
 
-def plot_and_save(df, folder_path):
-    # Iterate over unique locations
-    locations = df['location'].unique()
-    for location in locations:
-        # Filter data for the current location
-        location_df = df[df['location'] == location]
+#Seeting Warnings False
+st.set_option('deprecation.showPyplotGlobalUse', False)
 
-        # Create a bar plot
-        plt.figure(figsize=(10, 6))
-        plt.bar(location_df['year'], location_df['Capacity in kW'], color='skyblue')
-        plt.title(f"Capacity vs Year for {location}")
-        plt.xlabel("Year")
-        plt.ylabel("Capacity (kW)")
-        plt.grid(axis='y', linestyle='--', alpha=0.7)
-        plt.xticks(location_df['year'])  # Ensure all years are shown on x-axis
+# Define a function to plot and display the data
+def plot_and_display(df):
+    # Create a sidebar for user input
+    selected_location = st.sidebar.selectbox('Select Location', df['location'].unique())
 
-        # Save the plot
-        plot_filename = os.path.join(folder_path, f"{location}_capacity_bar_plot.png")
-        plt.savefig(plot_filename)
-        plt.close()
+    # Filter data based on user selection
+    filtered_df = df[df['location'] == selected_location]
 
-        print(f"Bar plot saved for {location} at: {plot_filename}")
+    # Create a bar plot
+    plt.figure(figsize=(10, 6))
+    plt.bar(filtered_df['year'], filtered_df['Capacity in kW'], color='skyblue')
+    plt.title(f"Capacity vs Year for {selected_location}")
+    plt.xlabel("Year")
+    plt.ylabel("Capacity (kW)")
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.xticks(filtered_df['year'])  # Ensure all years are shown on x-axis
 
-# Code for the first data set (No VRFB)
-folder_path_no_vrfb = "C:/GitHub/ZEN-garden/looper/PI_No_VRFB"
-os.makedirs(folder_path_no_vrfb, exist_ok=True)
-file_path_no_vrfb = "C:/GitHub/ZEN-garden/looper/PI_No_VRFB_Capacity.csv"
-df_no_vrfb = pd.read_csv(file_path_no_vrfb)
-plot_and_save(df_no_vrfb, folder_path_no_vrfb)
+    # Display the plot
+    st.pyplot()
 
-# Code for the second data set (With VRFB)
-folder_path_vrfb_battery = "C:/GitHub/ZEN-garden/looper/PI_VRFB/Battery"
-os.makedirs(folder_path_vrfb_battery, exist_ok=True)
-file_path_vrfb_battery = "C:/GitHub/ZEN-garden/looper/PI_VRFB_Capacity_Battery.csv"
-df_vrfb_battery = pd.read_csv(file_path_vrfb_battery)
-plot_and_save(df_vrfb_battery, folder_path_vrfb_battery)
+# Load the data based on user selection
+selected_dataset = st.sidebar.selectbox('Select Dataset', ['No VRFB', 'With VRFB - Battery', 'With VRFB - VRFB'])
+if selected_dataset == 'No VRFB':
+    file_path = "C:\\GitHub\\ZEN-garden\\looper\\PI_No_VRFB\\Unlimited_Imports\\PI_No_VRFB_Capacity.csv"
+elif selected_dataset == 'With VRFB - Battery':
+    file_path = "C:\\GitHub\\ZEN-garden\\looper\\PI_VRFB\\Unlimited_Imports\\PI_VRFB_Capacity_Battery.csv"
+else:
+    file_path = "C:\\GitHub\\ZEN-garden\\looper\\PI_VRFB\\Unlimited_Imports\\PI_VRFB_Capacity_VRFB.csv"
+df = pd.read_csv(file_path)
 
-# Code for the third data set (With VRFB)
-folder_path_vrfb_vrfb = "C:/GitHub/ZEN-garden/looper/PI_VRFB/VRFB"
-os.makedirs(folder_path_vrfb_vrfb, exist_ok=True)
-file_path_vrfb_vrfb = "C:/GitHub/ZEN-garden/looper/PI_VRFB_Capacity_VRFB.csv"
-df_vrfb_vrfb = pd.read_csv(file_path_vrfb_vrfb)
-plot_and_save(df_vrfb_vrfb, folder_path_vrfb_vrfb)
+# Run the Streamlit app
+st.title('Installed Capacity Dashboard')
+plot_and_display(df)
+

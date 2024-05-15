@@ -104,12 +104,16 @@ class IISConstraintParser(object):
     SIGNS_pretty = {EQUAL: "=", GREATER_EQUAL: "≥", LESS_EQUAL: "≤"}
 
     def __init__(self, iis_file, model):
+        # disable logger temporarily
+        logging.disable(logging.WARNING)
         self.iis_file = iis_file
         self.model = model
         # write gurobi IIS to file
         self.write_gurobi_iis()
         # get the labels
         self.constraint_labels,self.var_labels, self.var_lines = self.read_labels()
+        # enable logger again
+        logging.disable(logging.NOTSET)
 
     def write_parsed_output(self, outfile=None):
         """
@@ -138,11 +142,15 @@ class IISConstraintParser(object):
             f.write("\n\nVariables:\n")
             variables = self.model.variables
             for label in self.var_labels:
-                name, coord = self.get_label_position(variables,label)
-                var_str = f"\t{self.print_coord(coord)}:\t{self.var_lines[label]}\n"
-                if name not in seen_variables:
-                    seen_variables.append(name)
-                    var_str = f"\n{name}:\n{var_str}"
+                pos = variables.get_label_position(label)
+                if pos is not None:
+                    name, coord = pos
+                    var_str = f"\t{self.print_coord(coord)}:\t{self.var_lines[label]}\n"
+                    if name not in seen_variables:
+                        seen_variables.append(name)
+                        var_str = f"\n{name}:\n{var_str}"
+                else:
+                    var_str = f"\t{label}:\t{self.var_lines[label]}\n"
                 f.write(var_str)
 
     def write_gurobi_iis(self):
@@ -552,6 +560,28 @@ def lp_sum(exprs, dim='_term'):
     # normal sum
     return lp.expressions.merge(exprs, dim=dim)
 
+def align_like(da, other,fillna=0.0,astype=None):
+    """
+    Aligns a data array like another data array
+    :param da: The data array to align
+    :param other: The data array to align to
+    :return: The aligned data array
+    """
+    if isinstance(other,lp.Variable):
+        other = other.lower
+    elif isinstance(other,lp.LinearExpression):
+        other = other.const
+    elif isinstance(other,xr.DataArray):
+        other = other
+    else:
+        raise TypeError(f"other must be a Variable, LinearExpression or DataArray, not {type(other)}")
+    da = xr.align(da, other,join="right")[0]
+    da = da.broadcast_like(other)
+    if fillna is not None:
+        da = da.fillna(fillna)
+    if astype is not None:
+        da = da.astype(astype)
+    return da
 
 def linexpr_from_tuple_np(tuples, coords, model):
     """
@@ -1225,6 +1255,24 @@ class InputDataChecks:
 
         return df_input
 
+    @staticmethod
+    def read_system_file(config):
+        """
+        Reads the system file and returns the system dictionary
+
+        :param config: config object
+        """
+        # check if system.json file exists
+        # if os.path.exists(os.path.join(config.analysis["dataset"], "system.json")):
+        #     with open(os.path.join(config.analysis["dataset"], "system.json"), "r") as file:
+        #         system = json.load(file)
+        system_path = os.path.join(config.analysis['dataset'], "system.py")
+        spec = importlib.util.spec_from_file_location("module", system_path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        system = module.system
+        config.system.update(system)
+
 class StringUtils:
     """
     This class handles some strings for logging and filenames to tidy up scripts
@@ -1288,22 +1336,24 @@ class StringUtils:
         return scenario_name,subfolder,param_map
 
     @staticmethod
-    def get_model_name(analysis):
+    def get_model_name(analysis,system):
         """
         return model name while conducting some tests
-        :param analysis: analysis of optimziation
+        :param analysis: analysis of optimization
+        :param system: system of optimization
         :return: model name
         :return: output folder
         """
         model_name = os.path.basename(analysis["dataset"])
-        out_folder = StringUtils.get_output_folder(analysis)
+        out_folder = StringUtils.get_output_folder(analysis,system)
         return model_name,out_folder
 
     @staticmethod
-    def get_output_folder(analysis):
+    def get_output_folder(analysis,system):
         """
         return model name while conducting some tests
-        :param analysis: analysis of optimziation
+        :param analysis: analysis of optimization
+        :param system: system of optimization
         :return: output folder
         """
         model_name = os.path.basename(analysis["dataset"])
@@ -1315,12 +1365,14 @@ class StringUtils:
             logging.warning(f"The output folder '{out_folder}' already exists")
             if analysis["overwrite_output"]:
                 logging.warning("Existing files will be overwritten!")
-                for filename in os.listdir(out_folder):
-                    file_path = os.path.join(out_folder, filename)
-                    if os.path.isfile(file_path) or os.path.islink(file_path):
-                        os.unlink(file_path)
-                    elif os.path.isdir(file_path):
-                        shutil.rmtree(file_path)
+                if not system.conduct_scenario_analysis:
+                    # TODO fix for scenario analysis, shared folder for all scenarios, so not robust for parallel process
+                    for filename in os.listdir(out_folder):
+                        file_path = os.path.join(out_folder, filename)
+                        if os.path.isfile(file_path) or os.path.islink(file_path):
+                            os.unlink(file_path)
+                        elif os.path.isdir(file_path):
+                            shutil.rmtree(file_path)
         return out_folder
 
 class ScenarioUtils:

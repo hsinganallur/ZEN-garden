@@ -1,89 +1,247 @@
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
-def generate_plots(file_path, save_path):
-    # Load the data
-    data = pd.read_csv(file_path)
+import os
+import pandas as pd
+import matplotlib.pyplot as plt
 
-    # Task 1: Count the number of years
-    num_years = len(data.columns) - 3  # Assuming the first three columns are "technology", "capacity_type", and "location"
-    data.iloc[:, 3:] *= 1000000
+def generate_stacked_bar_plots(data, num_years, file_name, save_path, ylabel, title, unit, scenario_info, y_axis_limit=None):
+    fig, ax = plt.subplots(figsize=(10, 6))
+    bottom = None
+    for tech in data.columns:
+        if bottom is None:
+            ax.bar(data.index, data[tech], label=f"{tech} ({data[tech].sum():.0f} {unit})", alpha=0.7)
+            bottom = data[tech]
+        else:
+            ax.bar(data.index, data[tech], bottom=bottom, label=f"{tech} ({data[tech].sum():.0f} {unit})", alpha=0.7)
+            bottom += data[tech]
 
-    # Task 2: Extract data for power and energy for each technology
-    power_data = {}
-    energy_data = {}
-    for tech in data['technology'].unique():
-        tech_data = data[data['technology'] == tech]
-        power_data[tech] = tech_data[tech_data['capacity_type'].str.contains('power')]
-        energy_data[tech] = tech_data[tech_data['capacity_type'].str.contains('energy')]
+    ax.set_xlabel('Year')
+    ax.set_ylabel(ylabel)
+    ax.set_title(f"{title} - {scenario_info}")
+    ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    ax.grid(True)
+    ax.set_axisbelow(True)
+    ax.set_xticks(range(1, num_years + 1))
+    ax.tick_params(axis='x', rotation=0)
 
-    # Task 3: Sum up installed power for each country and each year for all technologies
-    stacked_power_data = pd.DataFrame(index=data['location'].unique(), columns=range(1, num_years + 1), dtype=float)
-    for country in data['location'].unique():
-        country_data = data[data['location'] == country]
+    if y_axis_limit is not None:
+        ax.set_ylim(y_axis_limit)
+
+    plt.tight_layout()
+    plt.savefig(f"{save_path}/{file_name}.png", dpi=300, bbox_inches='tight')
+    plt.close()
+
+def generate_power_plots(file_paths, save_paths, scenarios):
+    all_data = []
+    for file_path, scenario_info in zip(file_paths, scenarios):
+        data = pd.read_csv(file_path)
+        num_years = len(data.columns) - 3
+        #data.iloc[:, 3:] *= 1000
+
+        power_data = {}
+        for tech in data['technology'].unique():
+            tech_data = data[data['technology'] == tech]
+            power_data[tech] = tech_data[tech_data['capacity_type'].str.contains('power')]
+
+        stacked_power_data = pd.DataFrame(index=range(1, num_years + 1), columns=power_data.keys(), dtype=float)
         for year in range(1, num_years + 1):
-            stacked_power_data.loc[country, year] = country_data.iloc[:, 3:].sum(axis=0).loc[year]
+            for tech, tech_data in power_data.items():
+                stacked_power_data.loc[year, tech] = tech_data.iloc[:, year + 2].sum()
 
-    # Task 4: Generate stacked bar plots for installed power for each year
-    for year in range(1, num_years + 1):
-        fig, ax = plt.subplots(figsize=(10, 6))  # Larger figure size
-        bottom = None
-        for tech, power_df in power_data.items():
-            country_data = power_df[power_df['location'].isin(stacked_power_data.index)]
-            country_power = country_data.iloc[:, 3:].sum(axis=0).loc[year]
-            if bottom is None:
-                bottom = country_power
-            else:
-                ax.bar(stacked_power_data.index, country_power, bottom=bottom, label=tech)
-                bottom += country_power
+        all_data.extend(stacked_power_data.values.flatten().tolist())
 
-        ax.set_xlabel('Country')
-        ax.set_ylabel('Installed Power (kW)')
-        ax.set_title(f'Installed Power Over Countries - Year {year}')
-        ax.legend(loc='upper right')  # Place legend
-        plt.xticks(rotation=45)  # Rotate country labels for better visibility
-        plt.tight_layout()  # Adjust layout
-        plt.savefig(f"{save_path}/stacked_power_year_{year}.png")  # Save plot
+    y_axis_limit = (min(all_data), 1.5*max(all_data))  # Calculate the y-axis limit across all data
 
-    # Task 5: Sum up installed energy for each country and each year for all technologies
-    stacked_energy_data = pd.DataFrame(index=data['location'].unique(), columns=range(1, num_years + 1), dtype=float)
-    for country in data['location'].unique():
-        country_data = data[data['location'] == country]
+    for file_path, save_path, scenario_info in zip(file_paths, save_paths, scenarios):
+        file_name = os.path.splitext(os.path.basename(file_path))[0]
+        data = pd.read_csv(file_path)
+        num_years = len(data.columns) - 3
+        #data.iloc[:, 3:] *= 1000
+
+        power_data = {}
+        for tech in data['technology'].unique():
+            tech_data = data[data['technology'] == tech]
+            power_data[tech] = tech_data[tech_data['capacity_type'].str.contains('power')]
+
+        stacked_power_data = pd.DataFrame(index=range(1, num_years + 1), columns=power_data.keys(), dtype=float)
         for year in range(1, num_years + 1):
-            stacked_energy_data.loc[country, year] = country_data.iloc[:, 3:].sum(axis=0).loc[year]
+            for tech, tech_data in power_data.items():
+                stacked_power_data.loc[year, tech] = tech_data.iloc[:, year + 2].sum()
 
-    # Task 6: Generate stacked bar plots for installed energy for each year
-    for year in range(1, num_years + 1):
-        fig, ax = plt.subplots(figsize=(10, 6))  # Larger figure size
-        bottom = None
-        for tech, energy_df in energy_data.items():
-            country_data = energy_df[energy_df['location'].isin(stacked_energy_data.index)]
-            country_energy = country_data.iloc[:, 3:].sum(axis=0).loc[year]
-            if bottom is None:
-                bottom = country_energy
-            else:
-                ax.bar(stacked_energy_data.index, country_energy, bottom=bottom, label=tech)
-                bottom += country_energy
+        generate_stacked_bar_plots(stacked_power_data, num_years, f"stacked_power_{file_name}", save_path,
+                                   'Installed Power(GW)', 'Installed Power Over Technologies', 'GW', scenario_info, y_axis_limit)
 
-        ax.set_xlabel('Country')
-        ax.set_ylabel('Installed Energy (kWh)')
-        ax.set_title(f'Installed Energy Over Countries - Year {year}')
-        ax.legend(loc='upper right')  # Place legend
-        plt.xticks(rotation=45)  # Rotate country labels for better visibility
-        plt.tight_layout()  # Adjust layout
-        plt.savefig(f"{save_path}/stacked_energy_year_{year}.png")  # Save plot
+def generate_energy_plots(file_paths, save_paths, scenarios):
+    all_data = []
+    for file_path, scenario_info in zip(file_paths, scenarios):
+        data = pd.read_csv(file_path)
+        num_years = len(data.columns) - 3
+        #data.iloc[:, 3:] *= 1000000
 
-# List of file paths and corresponding save paths
-file_save_paths = [("C:\\GitHub\\ZEN-garden\\looper\\PI_VRFB\\No_Imports\\Unsorted\\PI_VRFB_Capacity_Total_Unsorted.csv",
-                    "C:\\GitHub\\ZEN-garden\\looper\\PI_VRFB\\No_Imports\\All_Technologies_Total"),
-                   ("C:\\GitHub\\ZEN-garden\\looper\\PI_VRFB\\Unlimited_Imports\\Unsorted\\PI_VRFB_Capacity_Total_Unsorted.csv",
-                    "C:\\GitHub\\ZEN-garden\\looper\\PI_VRFB\\Unlimited_Imports\\All_Technologies_Total"),
-                   ("C:\\GitHub\\ZEN-garden\\looper\\PI_No_VRFB\\No_Imports\\Unsorted\\PI_No_VRFB_Capacity_Total_Unsorted.csv",
-                   "C:\\GitHub\\ZEN-garden\\looper\\PI_No_VRFB\\No_Imports\\All_Technologies_Total"),
-                   ("C:\\GitHub\\ZEN-garden\\looper\\PI_No_VRFB\\Unlimited_Imports\\Unsorted\\PI_No_VRFB_Capacity_Total_Unsorted.csv",
-                   "C:\\GitHub\\ZEN-garden\\looper\\PI_No_VRFB\\Unlimited_Imports\\All_Technologies_Total")]
+        energy_data = {}
+        for tech in data['technology'].unique():
+            tech_data = data[data['technology'] == tech]
+            energy_data[tech] = tech_data[tech_data['capacity_type'].str.contains('energy')]
 
-# Generate plots for each file
-for file_path, save_path in file_save_paths:
-    generate_plots(file_path, save_path)
+        stacked_energy_data = pd.DataFrame(index=range(1, num_years + 1), columns=energy_data.keys(), dtype=float)
+        for year in range(1, num_years + 1):
+            for tech, tech_data in energy_data.items():
+                stacked_energy_data.loc[year, tech] = tech_data.iloc[:, year + 2].sum()
 
+        all_data.extend(stacked_energy_data.values.flatten().tolist())
+
+    y_axis_limit = (min(all_data), 1.5*max(all_data))  # Calculate the y-axis limit across all data
+
+    for file_path, save_path, scenario_info in zip(file_paths, save_paths, scenarios):
+        file_name = os.path.splitext(os.path.basename(file_path))[0]
+        data = pd.read_csv(file_path)
+        num_years = len(data.columns) - 3
+        #data.iloc[:, 3:] *= 1000000
+
+        energy_data = {}
+        for tech in data['technology'].unique():
+            tech_data = data[data['technology'] == tech]
+            energy_data[tech] = tech_data[tech_data['capacity_type'].str.contains('energy')]
+
+        stacked_energy_data = pd.DataFrame(index=range(1, num_years + 1), columns=energy_data.keys(), dtype=float)
+        for year in range(1, num_years + 1):
+            for tech, tech_data in energy_data.items():
+                stacked_energy_data.loc[year, tech] = tech_data.iloc[:, year + 2].sum()
+
+        generate_stacked_bar_plots(stacked_energy_data, num_years, f"stacked_energy_{file_name}", save_path,
+                                   'Installed Energy(GWh)', 'Installed Energy Over Technologies', 'GWh', scenario_info, y_axis_limit)
+
+def generate_specific_tech_plots(file_paths, save_paths, scenarios):
+    all_data = []
+    for file_path, scenario_info in zip(file_paths, scenarios):
+        data = pd.read_csv(file_path)
+        num_years = len(data.columns) - 3
+
+        specific_techs = ["battery", "hydrogen_storage", "pumped_hydro", "vanadium_redox_flow_battery"]
+        available_techs = [tech for tech in specific_techs if tech in data['technology'].unique()]
+
+        if not available_techs:
+            print(f"No data available for the specified technologies in {file_name}. Skipping...")
+            continue
+
+        specific_tech_data = {}
+        for tech in available_techs:
+            tech_data = data[data['technology'] == tech]
+            specific_tech_data[tech] = tech_data[tech_data['capacity_type'].str.contains('power')]
+
+        stacked_specific_tech_data = pd.DataFrame(index=range(1, num_years + 1), columns=specific_tech_data.keys(), dtype=float)
+        for year in range(1, num_years + 1):
+            for tech, tech_data in specific_tech_data.items():
+                stacked_specific_tech_data.loc[year, tech] = tech_data.iloc[:, year + 2].sum()
+
+        all_data.extend(stacked_specific_tech_data.values.flatten().tolist())
+
+    y_axis_limit = (min(all_data), 1.5*max(all_data))  # Calculate the y-axis limit across all data
+
+    for file_path, save_path, scenario_info in zip(file_paths, save_paths, scenarios):
+        file_name = os.path.splitext(os.path.basename(file_path))[0]
+        data = pd.read_csv(file_path)
+        num_years = len(data.columns) - 3
+
+        specific_techs = ["battery", "hydrogen_storage", "pumped_hydro", "vanadium_redox_flow_battery"]
+        available_techs = [tech for tech in specific_techs if tech in data['technology'].unique()]
+
+        if not available_techs:
+            print(f"No data available for the specified technologies in {file_name}. Skipping...")
+            continue
+
+        specific_tech_data = {}
+        for tech in available_techs:
+            tech_data = data[data['technology'] == tech]
+            specific_tech_data[tech] = tech_data[tech_data['capacity_type'].str.contains('power')]
+
+        stacked_specific_tech_data = pd.DataFrame(index=range(1, num_years + 1), columns=specific_tech_data.keys(), dtype=float)
+        for year in range(1, num_years + 1):
+            for tech, tech_data in specific_tech_data.items():
+                stacked_specific_tech_data.loc[year, tech] = tech_data.iloc[:, year + 2].sum()
+
+        generate_stacked_bar_plots(stacked_specific_tech_data, num_years, f"stacked_specific_tech_{file_name}", save_path,
+                                   'Installed Power(GW)', 'Installed Power for Specific Technologies', 'GW', scenario_info, y_axis_limit)
+
+
+def generate_specific_energy_plots(file_paths, save_paths, scenarios):
+    all_data = []
+    for file_path, scenario_info in zip(file_paths, scenarios):
+        data = pd.read_csv(file_path)
+        num_years = len(data.columns) - 3
+
+
+        specific_techs = ["battery", "hydrogen_storage", "pumped_hydro", "vanadium_redox_flow_battery"]
+        available_techs = [tech for tech in specific_techs if tech in data['technology'].unique()]
+
+        if not available_techs:
+            print(f"No data available for the specified technologies in {file_name}. Skipping...")
+            continue
+
+        specific_tech_data = {}
+        for tech in available_techs:
+            tech_data = data[data['technology'] == tech]
+            specific_tech_data[tech] = tech_data[tech_data['capacity_type'].str.contains('energy')]
+
+        stacked_specific_energy_data = pd.DataFrame(index=range(1, num_years + 1), columns=specific_tech_data.keys(), dtype=float)
+        for year in range(1, num_years + 1):
+            for tech, tech_data in specific_tech_data.items():
+                stacked_specific_energy_data.loc[year, tech] = tech_data.iloc[:, year + 2].sum()
+
+        all_data.extend(stacked_specific_energy_data.values.flatten().tolist())
+
+    y_axis_limit = (min(all_data), 1.5*max(all_data))  # Calculate the y-axis limit across all data
+
+    for file_path, save_path, scenario_info in zip(file_paths, save_paths, scenarios):
+        file_name = os.path.splitext(os.path.basename(file_path))[0]
+        data = pd.read_csv(file_path)
+        num_years = len(data.columns) - 3
+
+        specific_techs = ["battery", "hydrogen_storage", "pumped_hydro", "vanadium_redox_flow_battery"]
+        available_techs = [tech for tech in specific_techs if tech in data['technology'].unique()]
+
+        if not available_techs:
+            print(f"No data available for the specified technologies in {file_name}. Skipping...")
+            continue
+
+        specific_tech_data = {}
+        for tech in available_techs:
+            tech_data = data[data['technology'] == tech]
+            specific_tech_data[tech] = tech_data[tech_data['capacity_type'].str.contains('energy')]
+
+        stacked_specific_energy_data = pd.DataFrame(index=range(1, num_years + 1), columns=specific_tech_data.keys(), dtype=float)
+        for year in range(1, num_years + 1):
+            for tech, tech_data in specific_tech_data.items():
+                stacked_specific_energy_data.loc[year, tech] = tech_data.iloc[:, year + 2].sum()
+
+        generate_stacked_bar_plots(stacked_specific_energy_data, num_years, f"stacked_specific_energy_{file_name}", save_path,
+                                   'Installed Energy(GWh)', 'Installed Energy for Specific Technologies', 'GWh', scenario_info, y_axis_limit)
+
+
+file_paths = [
+    "C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Simulations\\T_14\\PI_No_VRFB_Imports_0_capacity_total.csv",
+    "C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Simulations\\T_14\\PI_No_VRFB_Imports_capacity_total.csv",
+    "C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Simulations\\T_14\\PI_VRFB_Imports_0_capacity_total.csv",
+    #"C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Simulations\\T_14\\PI_VRFB_Imports_capacity_total.csv"
+    ]
+
+save_paths = [
+    "C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Simulations\\T_14",
+    "C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Simulations\\T_14",
+    "C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Simulations\\T_14",
+    #"C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Simulations\\T_14"
+    ]
+
+scenarios = [
+    "PI folder without VRFBs and Imports",
+    "PI folder without VRFBs and Imports permitted",
+    "PI folder with VRFBs No Imports",
+    #"PI folder with VRFBs and Imports permitted"
+    ]
+
+generate_power_plots(file_paths, save_paths, scenarios)
+generate_energy_plots(file_paths, save_paths, scenarios)
+generate_specific_tech_plots(file_paths, save_paths, scenarios)
+generate_specific_energy_plots(file_paths, save_paths, scenarios)

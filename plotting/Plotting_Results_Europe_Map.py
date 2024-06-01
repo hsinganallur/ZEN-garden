@@ -1,53 +1,45 @@
-"""import geopandas as gpd
+import pandas as pd
+import geopandas as gpd
 import matplotlib.pyplot as plt
-import numpy as np
+from geodatasets import get_path
+from shapely.geometry import Point
 
-def plot_europe_map(output_file):
-    # Load the world map dataset from GeoPandas
-    world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
+# Load world map and restrict to Europe excluding Russia
+world = gpd.read_file(get_path("naturalearth.land"))
+europe = world[world['continent'] == 'Europe']
+europe = europe[europe['name'] != 'Russia']
 
-    # Filter the dataset to include only European countries, excluding Russia
-    europe = world[(world['continent'] == 'Europe') & (world['name'] != 'Russia')]
+# Create sample data for demonstration
+data = {
+    'Country': ['France', 'Germany', 'Italy', 'Spain', 'Poland', 'Netherlands', 'Belgium', 'Greece', 'Portugal', 'Sweden'],
+    'Value1': [5, 7, 3, 4, 6, 8, 2, 9, 4, 5],
+    'Value2': [6, 3, 7, 8, 2, 4, 6, 5, 7, 8]
+}
+df = pd.DataFrame(data)
 
-    # Further filter out entries with iso_a3 code '-99'
-    europe = europe[europe['iso_a3'] != '-99']
+# Convert DataFrame to GeoDataFrame by merging with Europe's GeoDataFrame
+europe = europe.set_index('name').join(df.set_index('Country'))
+europe = europe.reset_index()
 
-    # Create a figure
-    fig = plt.figure(figsize=(15, 10))
-    ax_map = fig.add_axes([0, 0, 1, 1])
-    europe.plot(ax=ax_map, color='whitesmoke', edgecolor='black')
+# Initialize plot
+fig, ax = plt.subplots(1, 1, figsize=(15, 15))
 
-    # Sample data for energy storage technologies
-    countries = europe['iso_a3'].tolist()  # European country codes
-    battery = np.random.randint(1, 20, len(countries))
-    pumped_hydro = np.random.randint(1, 20, len(countries))
-    thermal = np.random.randint(1, 20, len(countries))
+# Plot Europe map
+europe.boundary.plot(ax=ax, linewidth=1)
 
-    # Plot stacked bar plots for each country
-    for i, country in enumerate(countries):
-        # Get the centroid of the country
-        centroid = europe[europe['iso_a3'] == country]['geometry'].centroid.values[0]
-        lon, lat = centroid.x, centroid.y
+# Plot bar graphs at each country's centroid
+for idx, row in europe.iterrows():
+    if not pd.isnull(row['Value1']):
+        centroid = row['geometry'].centroid
+        x, y = centroid.x, centroid.y
+        ax.barh([y + 0.5, y - 0.5], [row['Value1'], row['Value2']], height=0.1, align='center', color=['blue', 'red'])
 
-        # Add a new axes for the bar plot inside the country
-        ax_bar = fig.add_axes([0.5 * (1 + lon / 180), 0.5 * (1 + lat / 90), 0.05, 0.05])
+# Set axis off and show plot
+ax.set_axis_off()
+# Save the figure
+plt.savefig('C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\europe_map_with_stacked_plots.png')
 
-        # Plot stacked bar plot
-        ax_bar.bar([1, 2, 3], [battery[i], pumped_hydro[i], thermal[i]], color=['blue', 'green', 'red'])
-        ax_bar.set_axis_off()
-
-    plt.savefig(output_file, bbox_inches='tight')
-    plt.close(fig)
-
-# Specify the output file path
-output_file = 'C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\europe_map.png'
-
-# Generate and save the map
-plot_europe_map(output_file)
-
-print(f"Map saved to {output_file}")"""
-
-from mpl_toolkits.basemap import Basemap
+"""from mpl_toolkits.basemap import Basemap
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 import matplotlib.pyplot as plt
 import numpy as np
@@ -96,11 +88,58 @@ for country in countries:
 
 # Create legend
 legend_patches = [mpatches.Patch(color=colors[i], label=tech) for i, tech in enumerate(technologies.keys())]
-ax.legend(handles=legend_patches, loc=1)
+ax.legend(handles=legend_patches, loc=1)"""
 
 # Save the figure
 plt.savefig('C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\europe_map_with_stacked_plots.png')
 
+"""import geopandas as gpd
+import matplotlib.pyplot as plt
+import numpy as np
 
+def plot_europe_map(output_file):
+    # Load the world map dataset from GeoPandas
+    world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
+
+    # Filter the dataset to include only European countries, excluding Russia
+    europe = world[(world['continent'] == 'Europe') & (world['name'] != 'Russia')]
+
+    # Further filter out entries with iso_a3 code '-99'
+    europe = europe[europe['iso_a3'] != '-99']
+
+    # Create a figure
+    fig = plt.figure(figsize=(15, 10))
+    ax_map = fig.add_axes([0, 0, 1, 1])
+    europe.plot(ax=ax_map, color='whitesmoke', edgecolor='black')
+
+    # Sample data for energy storage technologies
+    countries = europe['iso_a3'].tolist()  # European country codes
+    battery = np.random.randint(1, 20, len(countries))
+    pumped_hydro = np.random.randint(1, 20, len(countries))
+    thermal = np.random.randint(1, 20, len(countries))
+
+    # Plot stacked bar plots for each country
+    for i, country in enumerate(countries):
+        # Get the centroid of the country
+        centroid = europe[europe['iso_a3'] == country]['geometry'].centroid.values[0]
+        lon, lat = centroid.x, centroid.y
+
+        # Add a new axes for the bar plot inside the country
+        ax_bar = fig.add_axes([0.5 * (1 + lon / 180), 0.5 * (1 + lat / 90), 0.05, 0.05])
+
+        # Plot stacked bar plot
+        ax_bar.bar([1, 2, 3], [battery[i], pumped_hydro[i], thermal[i]], color=['blue', 'green', 'red'])
+        ax_bar.set_axis_off()
+
+    plt.savefig(output_file, bbox_inches='tight')
+    plt.close(fig)
+
+# Specify the output file path
+output_file = 'C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\europe_map.png'
+
+# Generate and save the map
+plot_europe_map(output_file)
+
+print(f"Map saved to {output_file}")"""
 
 

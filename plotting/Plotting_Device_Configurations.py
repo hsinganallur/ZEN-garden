@@ -152,7 +152,7 @@ new_ylabels = [
     'Sum of costs per unit of power (€/kW)',
     'Sum of costs per unit of energy (€/kWh)',
     'Efficiency (%)',
-    'Self discharge (%)'
+    'Self discharge (%/day)'
 ]
 
 new_data_sets = [sum_capex_opex_fixed, sum_opex_capex_var_energy, efficiency, self_discharge]

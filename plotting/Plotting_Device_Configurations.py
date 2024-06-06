@@ -4,28 +4,32 @@ import numpy as np
 def create_min_max_plot(data, labels, ylabel, title, file_path, color_map):
     plt.figure(figsize=(10, 6))
 
+    # Exclude 'VRFBD' and 'UPMRFBD' from labels and data
+    filtered_labels = [label for label in labels if label not in ['VRFBD', 'UPMRFBD']]
+    filtered_data = [data[labels.index(label)] for label in filtered_labels]
+
     # Calculate min and max for each dataset
-    min_values = [min(d) for d in data]
-    max_values = [max(d) for d in data]
+    min_values = [min(d) for d in filtered_data]
+    max_values = [max(d) for d in filtered_data]
 
     # Calculate positions for the labels
-    positions = np.arange(len(labels)) + 1
+    positions = np.arange(len(filtered_labels)) + 1
 
     # Plot lines for categories with single unique values
-    for pos, d, label in zip(positions, data, labels):
+    for pos, d, label in zip(positions, filtered_data, filtered_labels):
         color = color_map[label]
-        if len(set(d)) == 1 and label != 'VRFBD':  # Check if all values are the same
+        if len(set(d)) == 1:  # Check if all values are the same
             plt.plot([pos - 0.4, pos + 0.4], [d[0], d[0]], color=color, linewidth=5)
-        elif label == 'UPMRFBD':  # For UPMRFBD, plot each value as an individual line on the UPMRFB position
-            upmrfb_pos = positions[labels.index('UPMRFB')]
-            for val in d:
-                plt.plot([upmrfb_pos - 0.4, upmrfb_pos + 0.4], [val, val], color=color, linewidth=2, linestyle='--')
-        elif label == 'VRFBD':  # For VRFBD, plot each value as an individual line on the VRFB position
-            vrfb_pos = positions[labels.index('VRFB')]
-            for val in d:
-                plt.plot([vrfb_pos - 0.4, vrfb_pos + 0.4], [val, val], color=color, linewidth=2, linestyle='--')
-        else:
-            plt.bar(pos, max(d) - min(d), bottom=min(d), color=color)  # Use bars for varied values
+        elif label == 'UPMRFB':  # For UPMRFBD, plot each value as an individual line on the UPMRFB position
+            plt.bar(pos, max(d) - min(d), bottom=min(d), color=color)
+            for val in data[labels.index('UPMRFBD')]:
+                plt.plot([pos - 0.4, pos + 0.4], [val, val], color=color_map['UPMRFBD'], linewidth=2, linestyle='--')
+        elif label == 'VRFB':  # For VRFBD, plot each value as an individual line on the VRFB position
+            plt.bar(pos, max(d) - min(d), bottom=min(d), color=color)
+            for val in data[labels.index('VRFBD')]:
+                plt.plot([pos - 0.4, pos + 0.4], [val, val], color=color_map['VRFBD'], linewidth=2, linestyle='--')
+        #else:
+            #plt.bar(pos, max(d) - min(d), bottom=min(d), color=color)  # Use bars for varied values
 
     # Adjust y-axis ticks for the "Sum of costs per unit of power (€/kW)" plot
     if ylabel == 'Sum of costs per unit of power (€/kW)':
@@ -46,7 +50,7 @@ def create_min_max_plot(data, labels, ylabel, title, file_path, color_map):
 
     plt.title(title, fontsize=16)
     plt.ylabel(ylabel, fontsize=14)
-    plt.xticks(positions, labels, rotation=45, ha='right', fontsize=12)  # Rotate labels and adjust alignment
+    plt.xticks(positions, filtered_labels, rotation=45, ha='right', fontsize=12)  # Rotate labels and adjust alignment
     plt.yticks(fontsize=12)  # Increase y-axis tick font size
     plt.tight_layout()
 

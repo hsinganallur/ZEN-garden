@@ -14,11 +14,16 @@ def create_min_max_plot(data, labels, ylabel, title, file_path, color_map):
     # Plot lines for categories with single unique values
     for pos, d, label in zip(positions, data, labels):
         color = color_map[label]
-        if len(set(d)) == 1:  # Check if all values are the same
+        if len(set(d)) == 1 and label != 'VRFBD':  # Check if all values are the same
             plt.plot([pos - 0.4, pos + 0.4], [d[0], d[0]], color=color, linewidth=5)
-        elif label == 'UPMRFBD':  # For UPMRFBD, plot each value as an individual line
+        elif label == 'UPMRFBD':  # For UPMRFBD, plot each value as an individual line on the UPMRFB position
+            upmrfb_pos = positions[labels.index('UPMRFB')]
             for val in d:
-                plt.plot([pos - 0.4, pos + 0.4], [val, val], color=color, linewidth=5)
+                plt.plot([upmrfb_pos - 0.4, upmrfb_pos + 0.4], [val, val], color=color, linewidth=2, linestyle='--')
+        elif label == 'VRFBD':  # For VRFBD, plot each value as an individual line on the VRFB position
+            vrfb_pos = positions[labels.index('VRFB')]
+            for val in d:
+                plt.plot([vrfb_pos - 0.4, vrfb_pos + 0.4], [val, val], color=color, linewidth=2, linestyle='--')
         else:
             plt.bar(pos, max(d) - min(d), bottom=min(d), color=color)  # Use bars for varied values
 

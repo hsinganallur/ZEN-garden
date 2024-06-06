@@ -39,7 +39,7 @@ def create_min_max_plot(data, labels, ylabel, title, file_path, color_map):
         plt.yscale('log')
 
     # Adjust y-axis for the self discharge plot
-    if ylabel == 'Self discharge (%)':
+    if ylabel == 'Self discharge (%/hour)':
         plt.ylim(0, max(max_values) * 1.2)  # Increase the limit to ensure visibility
 
     # Adjust y-axis for the efficiency plot
@@ -152,16 +152,19 @@ sum_capex_opex_fixed, sum_opex_capex_var_energy = calculate_sum_and_ratios()
 annualized_capex_opex_fixed = calculate_annualized_costs(sum_capex_opex_fixed, lifetime)
 annualized_opex_capex_var_energy = calculate_annualized_costs(sum_opex_capex_var_energy, lifetime)
 
+# Convert 'Self discharge (%/day)' to 'Self discharge (%/hour)'
+self_discharge_per_hour = [[value / 24 for value in sublist] for sublist in self_discharge]
+
 # Common parameters for all plots
 file_prefix = 'C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\Mid-Term Presentation\\min_max_plot_energy_storage_new'
 new_ylabels = [
     'Sum of costs per unit of power (€/kW/year)',
     'Sum of costs per unit of energy (€/kWh/year)',
     'Efficiency (%)',
-    'Self discharge (%/day)'
+    'Self discharge (%/hour)'  # Update ylabel to reflect hourly self-discharge
 ]
 
-new_data_sets = [annualized_capex_opex_fixed, annualized_opex_capex_var_energy, efficiency, self_discharge]
+new_data_sets = [annualized_capex_opex_fixed, annualized_opex_capex_var_energy, efficiency, self_discharge_per_hour]
 
 # Generate and save plots
 for i, (data, y_label) in enumerate(zip(new_data_sets, new_ylabels)):

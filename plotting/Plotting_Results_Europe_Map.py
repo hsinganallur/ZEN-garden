@@ -1,4 +1,62 @@
+import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+import plotly.express as px
 import pandas as pd
+import numpy as np
+
+from zen_garden.postprocess.results.results import Results
+
+def main():
+    #zen_garden
+    out_folder = "C:\\GitHub\\ZEN-garden\\data\\outputs\\Run_1_PI_Imports"
+    r = Results(out_folder)
+    data_1 = r.get_total("capacity_addition").groupby('technology').sum()
+    data_2 = r.get_total("capacity")
+    # First, reset the index to get 'capacity_type' as a column
+    data_2 = data_2.reset_index()
+    # Filter the DataFrame by capacity_type "power"
+    filtered_data = data_2[data_2['capacity_type'] == 'energy']
+    a = 1
+if __name__ == "__main__":
+    main()
+
+
+"""import geopandas as gpd
+import matplotlib.pyplot as plt
+
+# Load the shapefile
+world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
+
+# Filter for European countries
+europe = world[(world['continent'] == 'Europe') & (world['name'] != 'Russia')]
+
+# Define regions (this is a simple example, regions can be defined more specifically)
+regions = {
+    'Northern Europe': ['Denmark', 'Estonia', 'Finland', 'Iceland', 'Ireland', 'Latvia', 'Lithuania', 'Norway', 'Sweden', 'United Kingdom'],
+    'Western Europe': ['Austria', 'Belgium', 'France', 'Germany', 'Liechtenstein', 'Luxembourg', 'Monaco', 'Netherlands', 'Switzerland'],
+    'Southern Europe': ['Albania', 'Andorra', 'Bosnia and Herzegovina', 'Croatia', 'Greece', 'Italy', 'Kosovo', 'Malta', 'Montenegro', 'North Macedonia', 'Portugal', 'San Marino', 'Serbia', 'Slovenia', 'Spain', 'Vatican'],
+    'Eastern Europe': ['Belarus', 'Bulgaria', 'Czech Republic', 'Hungary', 'Moldova', 'Poland', 'Romania', 'Slovakia', 'Ukraine']
+}
+
+# Create a new column in the GeoDataFrame for regions
+europe['region'] = None
+for region, countries in regions.items():
+    europe.loc[europe['name'].isin(countries), 'region'] = region
+
+# Plot the map
+fig, ax = plt.subplots(1, 1, figsize=(15, 10))
+europe.boundary.plot(ax=ax, linewidth=1, color='black')
+europe.plot(ax=ax, column='region', categorical=True, legend=True, legend_kwds={'bbox_to_anchor': (1, 1)}, cmap='tab20')
+
+# Add titles and labels
+plt.title('Map of Europe (excluding Russia) with Regions')
+plt.xlabel('Longitude')
+plt.ylabel('Latitude')
+
+plt.show()"""
+
+
+"""import pandas as pd
 import geopandas as gpd
 import matplotlib.pyplot as plt
 from geodatasets import get_path
@@ -37,7 +95,7 @@ for idx, row in europe.iterrows():
 # Set axis off and show plot
 ax.set_axis_off()
 # Save the figure
-plt.savefig('C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\europe_map_with_stacked_plots.png')
+plt.savefig('C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\europe_map_with_stacked_plots.png')"""
 
 """from mpl_toolkits.basemap import Basemap
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes

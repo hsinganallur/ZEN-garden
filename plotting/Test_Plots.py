@@ -1,4 +1,41 @@
-#Demand Supply Mismatch
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Time values
+time = np.linspace(0, 24, 1000)
+
+# Simulating energy demand and supply curves
+demand = 50 + 20 * np.sin(2 * np.pi * time / 24)  # Simulated demand curve
+supply = 40 + 10 * np.sin(2 * np.pi * (time / 24 + 0.5))  # Simulated supply curve shifted
+
+# Plotting
+plt.figure(figsize=(10, 6))
+
+# Plot demand and supply
+plt.plot(time, demand, label='Demand', color='brown', linewidth=2)
+plt.plot(time, supply, label='Supply', color='black', linewidth=2)
+
+# Fill areas of deficit and excess
+plt.fill_between(time, supply, demand, where=(demand > supply), facecolor='pink', alpha=0.5, interpolate=True, label='Deficit')
+plt.fill_between(time, supply, demand, where=(demand < supply), facecolor='red', alpha=0.5, interpolate=True, label='Excess')
+
+# Adjusting x-axis limits to touch the left and right edges
+plt.xlim(time.min(), time.max())
+
+# Remove numerical values from both X and Y axes
+plt.xticks([])
+plt.yticks([])
+
+# Adding labels and title
+plt.xlabel('Time')
+plt.ylabel('Energy')
+plt.title('Energy Demand and Supply Mismatch')
+plt.legend()
+
+# SaVE Plot
+plt.savefig('C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\Mid-Term Presentation\\power_supply_demand.png')
+
+"""#Demand Supply Mismatch
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -35,8 +72,8 @@ plt.savefig('power_supply_demand_straight_lines.png')
 
 # Save the plot to a file
 plt.savefig('C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\Mid-Term Presentation\\power_supply_demand.png')
-
-#Plotting_PI_No_VRFB
+"""
+"""#Plotting_PI_No_VRFB
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -282,7 +319,7 @@ for location in locations:
     for file_path, save_path in file_save_paths:
         generate_plots(file_path, save_path)
 
-    """# Load the data
+    # Load the data
     data = pd.read_csv("C:\\GitHub\\ZEN-garden\\looper\\PI_VRFB\\No_Imports\\Unsorted\\PI_VRFB_Capacity_Total_Unsorted.csv")  # Replace "your_data.csv" with the path to your data file
 
     # Task 1: Count the number of years
@@ -369,7 +406,7 @@ for location in locations:
         plt.tight_layout()  # Adjust layout
         plt.savefig(f"C:\\GitHub\\ZEN-garden\\looper\\PI_VRFB\\No_Imports\\Unsorted\\{tech}_installed_energy.png", bbox_inches='tight')  # Save plot with tight bounding box"""
 
-#Plotting_PI_No_VRFB_PI_VRFB_totals_V2
+"""#Plotting_PI_No_VRFB_PI_VRFB_totals_V2
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -720,4 +757,4 @@ selected_technologies = ["battery", "hydrogen_storage", "pumped_hydro", "vanadiu
 generate_storage_level_plots(file_paths, save_paths, scenarios, selected_technologies, log_scale=False)
 
 # Generate plot with log scale
-generate_storage_level_plots(file_paths, save_paths, scenarios, selected_technologies, log_scale=True)
+generate_storage_level_plots(file_paths, save_paths, scenarios, selected_technologies, log_scale=True)"""

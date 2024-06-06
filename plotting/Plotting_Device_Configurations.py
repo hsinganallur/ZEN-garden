@@ -28,16 +28,14 @@ def create_min_max_plot(data, labels, ylabel, title, file_path, color_map):
             plt.bar(pos, max(d) - min(d), bottom=min(d), color=color)
             for val in data[labels.index('VRFBD')]:
                 plt.plot([pos - 0.4, pos + 0.4], [val, val], color=color_map['VRFBD'], linewidth=2, linestyle='--')
-        #else:
-            #plt.bar(pos, max(d) - min(d), bottom=min(d), color=color)  # Use bars for varied values
 
     # Adjust y-axis ticks for the "Sum of costs per unit of power (€/kW)" plot
-    if ylabel == 'Sum of costs per unit of power (€/kW)':
+    if ylabel == 'Sum of costs per unit of power (€/kW/year)':
         max_y_value = max(max_values)
         y_ticks = np.arange(0, max_y_value + max_y_value * 0.1, max_y_value / 10)  # Add more ticks
         plt.yticks(y_ticks)
 
-    if ylabel == 'Sum of costs per unit of energy (€/kWh)':
+    if ylabel == 'Sum of costs per unit of energy (€/kWh/year)':
         plt.yscale('log')
 
     # Adjust y-axis for the self discharge plot
@@ -144,18 +142,26 @@ def calculate_sum_and_ratios():
 
     return sum_capex_opex_fixed, sum_opex_capex_var_energy
 
+def calculate_annualized_costs(sum_costs, lifetime):
+    annualized_costs = []
+    for i in range(len(sum_costs)):
+        annualized_costs.append([cost / lt for cost, lt in zip(sum_costs[i], lifetime[i])])
+    return annualized_costs
+
 sum_capex_opex_fixed, sum_opex_capex_var_energy = calculate_sum_and_ratios()
+annualized_capex_opex_fixed = calculate_annualized_costs(sum_capex_opex_fixed, lifetime)
+annualized_opex_capex_var_energy = calculate_annualized_costs(sum_opex_capex_var_energy, lifetime)
 
 # Common parameters for all plots
 file_prefix = 'C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\Mid-Term Presentation\\min_max_plot_energy_storage_new'
 new_ylabels = [
-    'Sum of costs per unit of power (€/kW)',
-    'Sum of costs per unit of energy (€/kWh)',
+    'Sum of costs per unit of power (€/kW/year)',
+    'Sum of costs per unit of energy (€/kWh/year)',
     'Efficiency (%)',
     'Self discharge (%/day)'
 ]
 
-new_data_sets = [sum_capex_opex_fixed, sum_opex_capex_var_energy, efficiency, self_discharge]
+new_data_sets = [annualized_capex_opex_fixed, annualized_opex_capex_var_energy, efficiency, self_discharge]
 
 # Generate and save plots
 for i, (data, y_label) in enumerate(zip(new_data_sets, new_ylabels)):

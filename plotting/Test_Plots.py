@@ -1,41 +1,73 @@
+import geopandas as gpd
 import matplotlib.pyplot as plt
-import numpy as np
+import pandas as pd
 
-# Time values
-time = np.linspace(0, 24, 1000)
+# Load the world map
+world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
 
-# Simulating energy demand and supply curves
-demand = 50 + 20 * np.sin(2 * np.pi * time / 24)  # Simulated demand curve
-supply = 40 + 10 * np.sin(2 * np.pi * (time / 24 + 0.5))  # Simulated supply curve shifted
+# Filter for European countries, excluding Russia
+europe = world[(world['continent'] == 'Europe') & (world['name'] != 'Russia')]
 
-# Plotting
-plt.figure(figsize=(10, 6))
+# Define regions and their countries
+regions = {
+    'Western Europe': ['Austria', 'Belgium', 'France', 'Germany', 'Luxembourg', 'Netherlands', 'Switzerland'],
+    'Northern Europe': ['Denmark', 'Estonia', 'Finland', 'Iceland', 'Ireland', 'Latvia', 'Lithuania', 'Norway', 'Sweden', 'United Kingdom'],
+    'Southern Europe': ['Croatia', 'Greece', 'Italy', 'Portugal', 'Slovenia', 'Spain'],
+    'Eastern Europe': ['Bulgaria', 'Czech Republic', 'Hungary', 'Poland', 'Romania', 'Slovakia']
+}
 
-# Plot demand and supply
-plt.plot(time, demand, label='Demand', color='brown', linewidth=2)
-plt.plot(time, supply, label='Supply', color='black', linewidth=2)
+# Create a DataFrame for region data
+region_data = {
+    'country': [],
+    'region': []
+}
 
-# Fill areas of deficit and excess
-plt.fill_between(time, supply, demand, where=(demand > supply), facecolor='pink', alpha=0.5, interpolate=True, label='Deficit')
-plt.fill_between(time, supply, demand, where=(demand < supply), facecolor='red', alpha=0.5, interpolate=True, label='Excess')
+for region, countries in regions.items():
+    for country in countries:
+        region_data['country'].append(country)
+        region_data['region'].append(region)
 
-# Adjusting x-axis limits to touch the left and right edges
-plt.xlim(time.min(), time.max())
+region_df = pd.DataFrame(region_data)
 
-# Remove numerical values from both X and Y axes
-plt.xticks([])
-plt.yticks([])
+# Merge the region data with the European map data
+europe = europe.merge(region_df, left_on='name', right_on='country')
 
-# Adding labels and title
-plt.xlabel('Time')
-plt.ylabel('Energy')
-plt.title('Energy Demand and Supply Mismatch')
-plt.legend()
+# Assign colors to each region
+region_colors = {
+    'Western Europe': '#a6cee3',
+    'Northern Europe': '#1f78b4',
+    'Southern Europe': '#b2df8a',
+    'Eastern Europe': '#33a02c'
+}
 
-# SaVE Plot
-plt.savefig('C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\Mid-Term Presentation\\power_supply_demand.png')
+# Plot the map
+fig, ax = plt.subplots(figsize=(15, 10))
 
-"""#Demand Supply Mismatch
+# Plot the data with region colors
+for region, color in region_colors.items():
+    region_subset = europe[europe['region'] == region]
+    region_subset.plot(ax=ax, color=color, edgecolor='0.8', linewidth=0.8, label=region)
+
+# Customize the plot
+#ax.set_title('Map of Continental Europe by Region', fontsize=15)
+ax.set_axis_off()
+
+# Set the limits for the zoom (bounding box coordinates)
+ax.set_xlim(-10, 40)  # Adjust these values to fit the zoom level you want
+ax.set_ylim(30, 83)   # Adjust these values to fit the zoom level you want
+
+# Add legend
+handles = [plt.Line2D([0], [0], marker='o', color='w', markerfacecolor=color, markersize=10, label=region)
+           for region, color in region_colors.items()]
+ax.legend(handles=handles, loc='upper left', title='Regions', frameon=True)
+
+# Save the plot
+plt.savefig("C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\Mid-Term Presentation\\Europe_Regions_Map_with_Legend.png")
+
+plt.show()
+
+"""
+#Demand Supply Mismatch
 import matplotlib.pyplot as plt
 import numpy as np
 

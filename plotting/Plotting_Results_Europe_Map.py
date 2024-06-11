@@ -1,4 +1,95 @@
 import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+from zen_garden.postprocess.results.results import Results
+
+# Define the regions and their corresponding country codes
+regions = {
+    'Western Europe': ['AT', 'BE', 'FR', 'DE', 'LU', 'NL', 'CH', 'UK'],
+    'Northern Europe': ['DK', 'EE', 'FI', 'IE', 'LV', 'LT', 'NO', 'SE'],
+    'Southern Europe': ['HR', 'EL', 'IT', 'PT', 'SI', 'ES'],
+    'Eastern Europe': ['BG', 'CZ', 'HU', 'PL', 'RO', 'SK']
+}
+
+out_folder1 = "C:\\GitHub\\ZEN-garden\\data\\outputs\\Run_4_PI_No_Imports_FB"
+r1 = Results(out_folder1)
+data_1 = r1.get_total("capacity")
+data_1 = data_1.reset_index()
+
+# Extract relevant data for each technology
+technologies = ['battery', 'hydrogen_storage', 'pumped_hydro', 'vanadium_redox_flow_battery',
+                'up_redox_flow_battery_1', 'up_redox_flow_battery_2',
+                'up_redox_flow_battery_3', 'up_redox_flow_battery_4', 'up_redox_flow_battery_5']
+
+tech_data = {}
+for tech in technologies:
+    tech_data[tech] = data_1[(data_1['capacity_type'] == 'energy') & (data_1['technology'] == tech)]
+
+# Sum the values of columns from 2024 to 2050 and add a new column with the sum
+for tech in technologies:
+    tech_data[tech]['sum_2024_to_2050'] = tech_data[tech].iloc[:, 3:7].sum(axis=1)
+
+# Define colors for each technology
+colors = {
+    'battery': '#00BFFF',
+    'hydrogen_storage': '#FF6347',
+    'pumped_hydro': '#00008B',
+    'vanadium_redox_flow_battery': '#d62728',
+    'up_redox_flow_battery_1': '#9467bd',
+    'up_redox_flow_battery_2': '#8c564b',
+    'up_redox_flow_battery_3': '#e377c2',
+    'up_redox_flow_battery_4': '#7f7f7f',
+    'up_redox_flow_battery_5': '#bcbd22'
+}
+
+# Function to get the sum of capacity for each region and each technology
+def get_region_data(region, tech_data, regions):
+    region_data = {tech: 0 for tech in technologies}
+    for country in regions[region]:
+        for tech in technologies:
+            country_data = tech_data[tech][tech_data[tech]['location'] == country]
+            if not country_data.empty:
+                region_data[tech] += country_data['sum_2024_to_2050'].values[0]
+    return region_data
+
+# Create pie charts for each region
+for region in regions:
+    region_data = get_region_data(region, tech_data, regions)
+    total_capacity = sum(region_data.values())
+
+    labels = [tech for tech in region_data if region_data[tech] > 0 and (region_data[tech] / total_capacity) * 100 >= 1]
+    sizes = [region_data[tech] for tech in labels]
+    color_list = [colors[tech] for tech in labels]
+
+    fig, ax = plt.subplots()
+    ax.set_facecolor('none')  # Set the background color to none
+    wedges, texts, autotexts = ax.pie(sizes, colors=color_list, autopct=lambda pct: ('%1.1f%%' % pct) if pct >= 1 else '',
+                                      startangle=90, textprops=dict(fontsize=14))  # Increased font size
+
+    for text in texts:
+        text.set_fontsize(14)  # Increased font size
+    for autotext in autotexts:
+        autotext.set_fontsize(14)  # Increased font size
+        autotext.set_color('white')  # Set color to white
+
+    ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+    plt.savefig(
+        "C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\Mid-Term Presentation\\Energy_Storage_Distribution_" + region + ".png",
+        format='png', transparent=True)
+
+# Create a separate legend image
+fig, ax = plt.subplots()
+ax.set_facecolor('none')  # Set the background color to none
+color_list = [colors[tech] for tech in technologies]
+wedges, texts = ax.pie([1] * len(technologies), labels=technologies, startangle=90, colors=color_list)
+ax.clear()
+ax.legend(wedges, technologies, loc='center', fontsize=20)  # Increased font size
+ax.axis('off')  # Hide the axes
+plt.savefig(
+    "C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\Mid-Term Presentation\\Legend.png",
+    format='png', transparent=True)
+
+"""import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import plotly.express as px
 import pandas as pd
@@ -19,8 +110,8 @@ def main():
     a = 1
 if __name__ == "__main__":
     main()
-
-
+"""
+#Autoplotting graphs over the map
 """import geopandas as gpd
 import matplotlib.pyplot as plt
 

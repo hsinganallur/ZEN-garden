@@ -2,6 +2,7 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 import pandas as pd
 import matplotlib as mpl
+import numpy as np
 
 #RES Plot
 # Load the world map
@@ -84,7 +85,41 @@ for bar in bars:
 # Save the plot
 plt.savefig("C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\Mid-Term Presentation\\Mckinsey_plot.png")
 
+#Generate Energy Supply Demand Profile
 
+# Time values
+time = np.linspace(0, 24, 1000)
+
+# Simulating energy demand and supply curves
+demand = 50 + 20 * np.sin(2 * np.pi * time / 24)  # Simulated demand curve
+supply = 40 + 10 * np.sin(2 * np.pi * (time / 24 + 0.5))  # Simulated supply curve shifted
+
+# Plotting
+plt.figure(figsize=(10, 6))
+
+# Plot demand and supply
+plt.plot(time, demand, label='Demand', color='brown', linewidth=2)
+plt.plot(time, supply, label='Supply', color='black', linewidth=2)
+
+# Fill areas of deficit and excess
+plt.fill_between(time, supply, demand, where=(demand > supply), facecolor='pink', alpha=0.5, interpolate=True, label='Deficit')
+plt.fill_between(time, supply, demand, where=(demand < supply), facecolor='gold', alpha=0.5, interpolate=True, label='Excess')
+
+# Adjusting x-axis limits to touch the left and right edges
+plt.xlim(time.min(), time.max())
+
+# Remove numerical values from both X and Y axes
+plt.xticks([])
+plt.yticks([])
+
+# Adding labels and title
+plt.xlabel('Time')
+plt.ylabel('Energy')
+plt.title('Energy Demand and Supply Mismatch')
+plt.legend()
+
+# SaVE Plot
+plt.savefig('C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\Mid-Term Presentation\\power_supply_demand.png')
 
 
 

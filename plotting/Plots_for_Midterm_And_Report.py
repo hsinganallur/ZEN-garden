@@ -41,10 +41,10 @@ sm._A = []  # dummy array for the ScalarMappable
 
 # Add the colorbar to the plot
 cbar = fig.colorbar(sm, ax=ax)
-cbar.set_label('Share of Renewable Energy Sources (%)')
+cbar.set_label('Targetted share of Renewable Energy Sources (%)', fontsize=15)
 
 # Customize the plot
-ax.set_title('Map of Continental Europe with Projections for 2030', fontsize=15)
+#ax.set_title('Map of Continental Europe with Projections for 2030', fontsize=15)
 ax.set_axis_off()
 
 # Set the limits for the zoom (bounding box coordinates)
@@ -66,12 +66,12 @@ plt.figure(figsize=(10, 6))
 bars = plt.bar(years, capacity, color=colors, width=3)
 
 # Adding labels and title
-plt.xlabel('Year')
-plt.ylabel('Cumulative LDES Installed Energy Capacity (TWh)')
-plt.title('Predicted Cumulative LDES Installed Energy Capacity Over Time')
+plt.xlabel('Year',fontsize=15)
+plt.ylabel('Installed Energy Capacity (TWh)', fontsize=15)
+plt.title('Predicted Cumulative LDES Installations', fontsize=15)
 
 # Setting x-axis to display only specified years
-plt.xticks(years)
+plt.xticks(years, fontsize=15)
 
 # Setting y-axis limit
 plt.ylim(0, 160)
@@ -80,7 +80,7 @@ plt.ylim(0, 160)
 for bar in bars:
     yval = bar.get_height()
     plt.text(bar.get_x() + bar.get_width()/2, yval + 5, f'{yval} TWh',
-             ha='center', va='bottom', fontsize=12, fontweight='bold', color='black')
+             ha='center', va='bottom', fontsize=15, fontweight='bold', color='black')
 
 # Save the plot
 plt.savefig("C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\Mid-Term Presentation\\Mckinsey_plot.png")
@@ -102,7 +102,7 @@ plt.plot(time, demand, label='Demand', color='brown', linewidth=2)
 plt.plot(time, supply, label='Supply', color='black', linewidth=2)
 
 # Fill areas of deficit and excess
-plt.fill_between(time, supply, demand, where=(demand > supply), facecolor='pink', alpha=0.5, interpolate=True, label='Deficit')
+plt.fill_between(time, supply, demand, where=(demand > supply), facecolor='red', alpha=0.5, interpolate=True, label='Deficit')
 plt.fill_between(time, supply, demand, where=(demand < supply), facecolor='gold', alpha=0.5, interpolate=True, label='Excess')
 
 # Adjusting x-axis limits to touch the left and right edges
@@ -113,9 +113,9 @@ plt.xticks([])
 plt.yticks([])
 
 # Adding labels and title
-plt.xlabel('Time')
-plt.ylabel('Energy')
-plt.title('Energy Demand and Supply Mismatch')
+plt.xlabel('Time', fontsize=15)
+plt.ylabel('Energy', fontsize=15)
+plt.title('Energy Demand and Supply Mismatch', fontsize=15)
 plt.legend()
 
 # SaVE Plot

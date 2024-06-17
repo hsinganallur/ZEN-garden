@@ -46,10 +46,10 @@ def create_min_max_plot(data, labels, ylabel, title, file_path, color_map):
     if ylabel == 'Efficiency (%)':
         plt.ylim(0, 100)  # Scale y-axis to 100
 
-    plt.title(title, fontsize=16)
-    plt.ylabel(ylabel, fontsize=14)
-    plt.xticks(positions, filtered_labels, rotation=45, ha='right', fontsize=12)  # Rotate labels and adjust alignment
-    plt.yticks(fontsize=12)  # Increase y-axis tick font size
+    plt.title(title, fontsize=15)
+    plt.ylabel(ylabel, fontsize=15)
+    plt.xticks(positions, filtered_labels, rotation=45, ha='right', fontsize=15)  # Rotate labels and adjust alignment
+    plt.yticks(fontsize=15)  # Increase y-axis tick font size
     plt.tight_layout()
 
     # Save plot to file
@@ -61,17 +61,23 @@ def create_legend_image(file_path, color_map):
     # Create a new figure for the legend
     plt.figure(figsize=(10, 2))
     legend_labels = [
-        'B - Battery',
-        'HS - Hydrogen Storage',
-        'PH - Pumped Hydro',
-        'VRFB - Vanadium Redox Flow Battery',
+        'LiB - Lithium Ion Battery (E/P: 1min-8h)',
+        'HS - Hydrogen Storage (E/P: min to weeks)',
+        'PH - Pumped Hydro (E/P: 4h-16h)',
+        'VRFB - Vanadium Redox Flow Battery (E/P: hours)',
         'VRFBD - Vanadium Redox Flow Battery Device',
         'UPMRFB - UP Membraneless Redox Flow Battery',
-        'UPMRFBD - UP Membraneless Redox Flow Battery Device'
+        'UPMRFBD - UP Membraneless Redox Flow Battery Device (E/P: hours)'
     ]
-    legend_patches = [plt.Line2D([0], [0], color=color_map[label.split(' ')[0]], lw=4) for label in legend_labels]
 
-    plt.legend(legend_patches, legend_labels, loc='center', ncol=1, frameon=False, fontsize=12)
+    legend_patches = []
+    for label in legend_labels:
+        color = color_map[label.split(' ')[0]]
+        linestyle = '--' if 'VRFBD' in label or 'UPMRFBD' in label else '-'
+        line = plt.Line2D([0], [0], color=color, lw=4, linestyle=linestyle)
+        legend_patches.append(line)
+
+    plt.legend(legend_patches, legend_labels, loc='center', ncol=1, frameon=False, fontsize=15)
     plt.axis('off')
     plt.savefig(file_path, bbox_inches='tight')
     print(f"Legend saved at {file_path}")
@@ -114,10 +120,10 @@ lifetime = [
     [13] * 5, [100] * 5, [60] * 5, [15, 20, 20, 25, 10], [20] , [20, 25, 25, 20, 20], [20, 25, 25, 20, 20]
 ]
 
-labels = ['B', 'HS', 'PH', 'VRFB', 'VRFBD', 'UPMRFB', 'UPMRFBD']
+labels = ['LiB', 'HS', 'PH', 'VRFB', 'VRFBD', 'UPMRFB', 'UPMRFBD']
 # Updated colors for differentiation
 color_map = {
-    'B': '#00BFFF',
+    'LiB': '#00BFFF',
     'HS': '#FF6347',
     'PH': '#00008B',
     'VRFB': '#FFC0CB',
@@ -175,7 +181,6 @@ for i, (data, y_label) in enumerate(zip(new_data_sets, new_ylabels)):
 # Generate and save legend
 legend_file_path = 'C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\Mid-Term Presentation\\legend1new.png'
 create_legend_image(legend_file_path, color_map)
-
 """
 import matplotlib.pyplot as plt
 import numpy as np

@@ -11,7 +11,7 @@ regions = {
     'Eastern Europe': ['BG', 'CZ', 'HU', 'PL', 'RO', 'SK']
 }
 
-out_folder1 = "C:\\GitHub\\ZEN-garden\\data\\outputs\\Run_4_PI_No_Imports_FB"
+out_folder1 = "C:\\GitHub\\ZEN-garden\\data\\outputs\\Run_3_PI_Imports_FB"
 r1 = Results(out_folder1)
 data_1 = r1.get_total("capacity")
 data_1 = data_1.reset_index()
@@ -42,6 +42,24 @@ colors = {
     'up_redox_flow_battery_5': '#bcbd22'
 }
 
+#Total Costs
+def get_total_cost():
+    cost_capex = r1.get_df("cost_capex_total")
+    cost_opex = r1.get_df("cost_opex_total")
+
+    # Convert dictionaries to DataFrames
+    df_cost_capex = pd.DataFrame.from_dict(cost_capex)
+    df_cost_opex = pd.DataFrame.from_dict(cost_opex)
+
+    # Summing up the DataFrames
+    total_cost = df_cost_capex.add(df_cost_opex, fill_value=0)
+
+    # Printing the total cost
+    print("Total Cost (Capex + Opex):")
+    print(total_cost)
+
+get_total_cost()
+
 # Function to get the sum of capacity for each region and each technology
 def get_region_data(region, tech_data, regions):
     region_data = {tech: 0 for tech in technologies}
@@ -64,12 +82,12 @@ for region in regions:
     fig, ax = plt.subplots()
     ax.set_facecolor('none')  # Set the background color to none
     wedges, texts, autotexts = ax.pie(sizes, colors=color_list, autopct=lambda pct: ('%1.1f%%' % pct) if pct >= 1 else '',
-                                      startangle=90, textprops=dict(fontsize=14))  # Increased font size
+                                      startangle=90, textprops=dict(fontsize=20))  # Increased font size
 
     for text in texts:
-        text.set_fontsize(14)  # Increased font size
+        text.set_fontsize(30)  # Increased font size
     for autotext in autotexts:
-        autotext.set_fontsize(14)  # Increased font size
+        autotext.set_fontsize(30)  # Increased font size
         autotext.set_color('white')  # Set color to white
 
     ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
@@ -88,6 +106,50 @@ ax.axis('off')  # Hide the axes
 plt.savefig(
     "C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\Mid-Term Presentation\\Legend.png",
     format='png', transparent=True)
+
+# Function to plot storage levels over time
+storage_data = r1.get_full_ts("storage_level")
+storage_data = storage_data.reset_index()
+
+
+def plot_storage_levels_all_regions(storage_data, regions, technologies):
+    plt.figure(figsize=(14, 8))
+    aggregated_storage_data = pd.DataFrame(columns=storage_data.columns)
+
+    for region in regions:
+        region_storage_data = storage_data[storage_data['node'].isin(regions[region])]
+        if not region_storage_data.empty:
+            aggregated_storage_data = pd.concat([aggregated_storage_data, region_storage_data], ignore_index=True)
+
+    for tech in technologies:
+        tech_storage_data = aggregated_storage_data[aggregated_storage_data['technology'] == tech]
+        if not tech_storage_data.empty:
+            # Assuming the column names represent time steps
+            time_steps = tech_storage_data.columns[2:]  # Assuming the first two columns are 'node' and 'technology'
+            storage_values = tech_storage_data.iloc[:, 2:].sum(axis=0).values / 1000  # Summing and converting to TWh
+            plt.plot(time_steps, storage_values, label=f"{tech} (Europe)", color=colors[tech])
+
+    plt.xlabel('Time Steps', fontsize=15)
+    plt.ylabel('Storage Level (TWh)', fontsize=15)
+    plt.title('Storage Levels Over Time (Europe)', fontsize=15)
+    #plt.legend(fontsize=15)
+    plt.grid(True)
+    plt.savefig(
+        "C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\Mid-Term Presentation\\Storage_Levels_Over_Time_Europe.png",
+        format='png')
+
+plot_storage_levels_all_regions(storage_data, regions, technologies)
+
+def print_total_installed_energy(tech_data, regions):
+    for region in regions:
+        region_data = get_region_data(region, tech_data, regions)
+        total_capacity = sum(region_data.values())
+
+        print(f"Total Installed Energy Capacity for {region}:")
+        total_region_capacity = sum(region_data.values())
+        print(f"Total Capacity: {total_region_capacity} MW")
+
+print_total_installed_energy(tech_data, regions)
 
 """import matplotlib.pyplot as plt
 import plotly.graph_objects as go

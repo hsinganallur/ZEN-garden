@@ -1,3 +1,56 @@
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Data preparation
+labels = ['LiB', 'HS', 'PH', 'VRFB', 'UPMRFB']
+E_P_min = [1/60, 1/60, 4, 1, 1]  # Minimum E/P in hours (converted minutes to hours)
+E_P_max = [8, 7*24, 16, 30, 30]  # Maximum E/P in hours (extended for VRFB and UPMRFB)
+
+# Number of variables
+num_vars = len(labels)
+
+# Compute angle of each axis
+angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
+
+# The plot is made in a circular (not polygon) shape, so we need to "complete the loop"
+# and append the start to the end.
+E_P_min += E_P_min[:1]
+E_P_max += E_P_max[:1]
+angles += angles[:1]
+
+# Plot
+fig, ax = plt.subplots(figsize=(10, 10), subplot_kw=dict(polar=True))
+
+# Draw one axe per variable and add labels
+ax.set_theta_offset(np.pi / 2)
+ax.set_theta_direction(-1)
+
+plt.xticks(angles[:-1], labels, fontsize=15)  # Set font size for the labels
+
+# Draw ylabels
+ax.set_rscale('log')
+ax.set_rlabel_position(0)
+plt.yticks([0.1, 1, 10, 100, 200], ["0.1h", "1h", "10h", "100h", "200h"], color="grey", size=15)  # Set font size for the y-ticks
+plt.ylim(0.1, 200)
+
+# Plot data
+ax.plot(angles, E_P_min, linewidth=1, linestyle='solid', label='E/P Min')
+ax.fill(angles, E_P_min, 'b', alpha=0.1)
+
+ax.plot(angles, E_P_max, linewidth=1, linestyle='solid', label='E/P Max')
+ax.fill(angles, E_P_max, 'r', alpha=0.1)
+
+# Adjust layout
+plt.subplots_adjust(top=0.9, bottom=0.1, left=0.1, right=0.9)
+
+# Add a legend
+plt.legend(loc='upper right', bbox_to_anchor=(0.1, 0.1), fontsize=15)  # Set font size for the legend
+
+plt.savefig("C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\Mid-Term Presentation\\WebSpider.png")
+
+
+"""
+#BackgroundPlot
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -64,7 +117,7 @@ ax.legend(handles=handles, loc='upper left', title='Regions', frameon=True)
 # Save the plot
 plt.savefig("C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\Mid-Term Presentation\\Europe_Regions_Map_with_Legend.png")
 
-plt.show()
+plt.show()"""
 
 """
 #Demand Supply Mismatch

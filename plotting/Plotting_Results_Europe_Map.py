@@ -11,22 +11,28 @@ regions = {
     'Eastern Europe': ['BG', 'CZ', 'HU', 'PL', 'RO', 'SK']
 }
 
-out_folder1 = "C:\\GitHub\\ZEN-garden\\data\\outputs\\Run_3_PI_Imports_FB"
+out_folder1 = "C:\\GitHub\\ZEN-garden\\data\\outputs\\Vanilla_PI_FB_No_Power_Lines_Green_3"
 r1 = Results(out_folder1)
 data_1 = r1.get_total("capacity")
+
+"""# Create a DataFrame
+df = pd.DataFrame(data_1)
+file_path = 'C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\Mid-Term Presentation\\capacity_data.xlsx'
+df.to_excel(file_path, index=True)"""
+
 data_1 = data_1.reset_index()
 
 # Extract relevant data for each technology
-technologies = ['battery', 'hydrogen_storage', 'pumped_hydro', 'vanadium_redox_flow_battery',
+storage_technologies = ['battery', 'hydrogen_storage', 'pumped_hydro', 'vanadium_redox_flow_battery',
                 'up_redox_flow_battery_1', 'up_redox_flow_battery_2',
                 'up_redox_flow_battery_3', 'up_redox_flow_battery_4', 'up_redox_flow_battery_5']
 
 tech_data = {}
-for tech in technologies:
+for tech in storage_technologies:
     tech_data[tech] = data_1[(data_1['capacity_type'] == 'energy') & (data_1['technology'] == tech)]
 
 # Sum the values of columns from 2024 to 2050 and add a new column with the sum
-for tech in technologies:
+for tech in storage_technologies:
     tech_data[tech]['sum_2024_to_2050'] = tech_data[tech].iloc[:, 3:7].sum(axis=1)
 
 # Define colors for each technology
@@ -62,9 +68,9 @@ get_total_cost()
 
 # Function to get the sum of capacity for each region and each technology
 def get_region_data(region, tech_data, regions):
-    region_data = {tech: 0 for tech in technologies}
+    region_data = {tech: 0 for tech in storage_technologies}
     for country in regions[region]:
-        for tech in technologies:
+        for tech in storage_technologies:
             country_data = tech_data[tech][tech_data[tech]['location'] == country]
             if not country_data.empty:
                 region_data[tech] += country_data['sum_2024_to_2050'].values[0]
@@ -98,10 +104,10 @@ for region in regions:
 # Create a separate legend image
 fig, ax = plt.subplots()
 ax.set_facecolor('none')  # Set the background color to none
-color_list = [colors[tech] for tech in technologies]
-wedges, texts = ax.pie([1] * len(technologies), labels=technologies, startangle=90, colors=color_list)
+color_list = [colors[tech] for tech in storage_technologies]
+wedges, texts = ax.pie([1] * len(storage_technologies), labels=storage_technologies, startangle=90, colors=color_list)
 ax.clear()
-ax.legend(wedges, technologies, loc='center', fontsize=20)  # Increased font size
+ax.legend(wedges, storage_technologies, loc='center', fontsize=20)  # Increased font size
 ax.axis('off')  # Hide the axes
 plt.savefig(
     "C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\Mid-Term Presentation\\Legend.png",
@@ -111,8 +117,7 @@ plt.savefig(
 storage_data = r1.get_full_ts("storage_level")
 storage_data = storage_data.reset_index()
 
-
-def plot_storage_levels_all_regions(storage_data, regions, technologies):
+def plot_storage_levels_all_regions(storage_data, regions, storage_technologies):
     plt.figure(figsize=(14, 8))
     aggregated_storage_data = pd.DataFrame(columns=storage_data.columns)
 
@@ -121,24 +126,35 @@ def plot_storage_levels_all_regions(storage_data, regions, technologies):
         if not region_storage_data.empty:
             aggregated_storage_data = pd.concat([aggregated_storage_data, region_storage_data], ignore_index=True)
 
-    for tech in technologies:
+    for tech in storage_technologies:
         tech_storage_data = aggregated_storage_data[aggregated_storage_data['technology'] == tech]
         if not tech_storage_data.empty:
             # Assuming the column names represent time steps
             time_steps = tech_storage_data.columns[2:]  # Assuming the first two columns are 'node' and 'technology'
             storage_values = tech_storage_data.iloc[:, 2:].sum(axis=0).values / 1000  # Summing and converting to TWh
-            plt.plot(time_steps, storage_values, label=f"{tech} (Europe)", color=colors[tech])
+
+            # Filter out values that are <= 0
+            positive_indices = storage_values > 0.001
+            time_steps = time_steps[positive_indices]
+            storage_values = storage_values[positive_indices]
+
+            if len(storage_values) > 0:
+                plt.plot(time_steps, storage_values, label=f"{tech}", color=colors[tech])
 
     plt.xlabel('Time Steps', fontsize=15)
     plt.ylabel('Storage Level (TWh)', fontsize=15)
-    plt.title('Storage Levels Over Time (Europe)', fontsize=15)
-    #plt.legend(fontsize=15)
+    plt.title('Energy Capacity Over Time', fontsize=15)
     plt.grid(True)
+
+    # Adjust the position of the legend
+    plt.legend(fontsize=15, bbox_to_anchor=(1.05, 1), loc='upper left')
+
     plt.savefig(
         "C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\Mid-Term Presentation\\Storage_Levels_Over_Time_Europe.png",
-        format='png')
+        format='png', bbox_inches='tight')
 
-plot_storage_levels_all_regions(storage_data, regions, technologies)
+# Call the function to generate the plot
+plot_storage_levels_all_regions(storage_data, regions, storage_technologies)
 
 def print_total_installed_energy(tech_data, regions):
     for region in regions:
@@ -299,10 +315,10 @@ for country in countries:
 
 # Create legend
 legend_patches = [mpatches.Patch(color=colors[i], label=tech) for i, tech in enumerate(technologies.keys())]
-ax.legend(handles=legend_patches, loc=1)"""
+ax.legend(handles=legend_patches, loc=1)
 
 # Save the figure
-plt.savefig('C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\europe_map_with_stacked_plots.png')
+#plt.savefig('C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\europe_map_with_stacked_plots.png')"""
 
 """import geopandas as gpd
 import matplotlib.pyplot as plt

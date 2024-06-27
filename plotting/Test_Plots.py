@@ -1,6 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+battery_capacities = [1895.660994063559, 1266.7246940871096, 2355.9550329609974,1400.711801020117,1632.8159422367958, 2844.3719489602095]
+time_steps = [1000, 800, 400, 80, 72, 4380]
+"""import matplotlib.pyplot as plt
+import numpy as np
+
 # Data preparation
 labels = ['LiB', 'HS', 'PH', 'VRFB', 'UPMRFB']
 E_P_min = [1/60, 1/60, 4, 1, 1]  # Minimum E/P in hours (converted minutes to hours)
@@ -46,7 +51,7 @@ plt.subplots_adjust(top=0.9, bottom=0.1, left=0.1, right=0.9)
 # Add a legend
 plt.legend(loc='upper right', bbox_to_anchor=(0.1, 0.1), fontsize=15)  # Set font size for the legend
 
-plt.savefig("C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\Mid-Term Presentation\\WebSpider.png")
+plt.savefig("C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\Mid-Term Presentation\\WebSpider.png")"""
 
 
 """

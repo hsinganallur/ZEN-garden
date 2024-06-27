@@ -3,19 +3,6 @@ import pandas as pd
 import numpy as np
 from zen_garden.postprocess.results.results import Results
 
-# Define the regions and their corresponding country codes
-regions = {
-    'Western Europe': ['AT', 'BE', 'FR', 'DE', 'LU', 'NL', 'CH', 'UK'],
-    'Northern Europe': ['DK', 'EE', 'FI', 'IE', 'LV', 'LT', 'NO', 'SE'],
-    'Southern Europe': ['HR', 'EL', 'IT', 'PT', 'SI', 'ES'],
-    'Eastern Europe': ['BG', 'CZ', 'HU', 'PL', 'RO', 'SK']
-}
-
-out_folder1 = "C:\\GitHub\\ZEN-garden\\data\\outputs\\Vanilla_PI_FB_No_Power_Lines_Green_3"
-r1 = Results(out_folder1)
-data_1 = r1.get_total("capacity")
-data_1 = data_1.reset_index()
-
 # Extract relevant data for each technology
 storage_technologies = ['battery', 'hydrogen_storage', 'pumped_hydro', 'vanadium_redox_flow_battery',
                         'up_redox_flow_battery_1', 'up_redox_flow_battery_2',
@@ -32,6 +19,7 @@ colors = {
     'battery': '#00BFFF',
     'hydrogen_storage': '#FF6347',
     'pumped_hydro': '#00008B',
+    'carbon_pipeline': '#00009B',
     'vanadium_redox_flow_battery': '#d62728',
     'up_redox_flow_battery_1': '#9467bd',
     'up_redox_flow_battery_2': '#8c564b',
@@ -59,59 +47,93 @@ colors = {
     'wind_onshore': '#b5cf6b'
 }
 
-# Function to plot storage levels over time
-def plot_storage_levels_all_regions(storage_data, regions, storage_technologies):
-    plt.figure(figsize=(14, 8))
-    aggregated_storage_data = pd.DataFrame(columns=storage_data.columns)
+out_folder1 = "C:\\GitHub\\ZEN-garden\\data\\outputs\\Vanilla_PI_FB_No_Power_Lines_Green_3"
+r = Results(out_folder1)
+data_1 = r.get_total("capacity")
+data_1 = data_1.reset_index()
+data_1_power = data_1[data_1['capacity_type'] == 'power']
+data_1_power = (data_1_power.groupby('technology').sum())#.groupby('location').sum()
+data_1_power.drop(columns=['capacity_type','location'],inplace=True)
+data_1_energy = data_1[data_1['capacity_type'] == 'energy']
+data_1_energy = (data_1_energy.groupby('technology').sum())#.groupby('location').sum()
+data_1_energy.drop(columns=['capacity_type','location'],inplace=True)
+data_cycles = ((r.get_total("flow_storage_discharge").groupby('technology').sum() / r.get_total("efficiency_discharge").groupby('technology').mean()) + (r.get_total("flow_storage_charge").groupby('technology').sum() / r.get_total("efficiency_charge").groupby('technology').mean()) ) /2/ r.get_total('capacity').loc[:,'energy',:].groupby('technology').sum()
+flow_storage_data = r.get_full_ts("flow_storage_discharge").groupby('technology').sum()
+flow_conversion_output_data = r.get_full_ts("flow_conversion_output").groupby('technology').sum()
 
-    for region in regions:
-        region_storage_data = storage_data[storage_data['node'].isin(regions[region])]
-        if not region_storage_data.empty:
-            aggregated_storage_data = pd.concat([aggregated_storage_data, region_storage_data], ignore_index=True)
+# Filter data greater than 1
+data_1_energy_filtered = data_1_energy[data_1_energy > 1].dropna()
+data_1_power_filtered = data_1_power[data_1_power > 1].dropna()
+# Divide by 1000 - TWh, TW
+data_1_energy_filtered /= 1000
+data_1_power_filtered /= 1000
 
-    for tech in storage_technologies:
-        tech_storage_data = aggregated_storage_data[aggregated_storage_data['technology'] == tech]
-        if not tech_storage_data.empty:
-            time_steps = tech_storage_data.columns[2:]
-            storage_values = tech_storage_data.iloc[:, 2:].sum(axis=0).values / 1000
-            if np.any(storage_values > 0.0001):
-                plt.plot(time_steps, storage_values, label=f"{tech}", color=colors[tech])
+def plot_stacked_energy(data):
+    num_years = len(data.columns) - 1  # Number of years is determined by the number of columns minus 1 (excluding 'technology')
+    num_technologies = len(data)  # Number of technologies
 
-    plt.xlabel('Time Steps', fontsize=15)
-    plt.ylabel('Energy Capacity Level (TWh)', fontsize=15)
-    plt.title('Energy Over Time', fontsize=15)
-    plt.grid(True)
+    # Sort technologies based on their total energy values in the last year (or any year of choice)
+    data_sorted = data.sort_values(by=data.columns[-1], axis=0, ascending=True)
 
-# Function to plot conversion levels over time
-def plot_conversion_levels_all_regions(conversion_data, regions, conversion_technologies):
-    # Filter rows where "carrier" column contains the word "electricity"
-    conversion_data = conversion_data[conversion_data['carrier'].str.contains('electricity', na=False)]
-    conversion_data = conversion_data.drop(columns=['carrier'])
+    # Plot stacked bars
+    fig, ax = plt.subplots(figsize=(12, 8))
 
-    aggregated_conversion_data = pd.DataFrame(columns=conversion_data.columns)
+    # Prepare data for plotting
+    years = np.arange(num_years)  # Use integers for the x-axis
+    technologies = data_sorted.index  # Technologies sorted by total energy values
 
-    for region in regions:
-        region_conversion_data = conversion_data[conversion_data['node'].isin(regions[region])]
-        if not region_conversion_data.empty:
-            aggregated_conversion_data = pd.concat([aggregated_conversion_data, region_conversion_data], ignore_index=True)
+    # Initialize bottom array for stacked bar plot
+    bottom = np.zeros(num_years)
 
-    for tech in conversion_technologies:
-        tech_conversion_data = aggregated_conversion_data[aggregated_conversion_data['technology'] == tech]
-        if not tech_conversion_data.empty:
-            time_steps = tech_conversion_data.columns[2:]
-            conversion_values = tech_conversion_data.iloc[:, 2:].sum(axis=0).values / 1000
-            if np.any(conversion_values > 0.0001):
-                plt.plot(time_steps, conversion_values, label=f"{tech} (Europe)", linestyle='--', color=colors[tech])
+    # Plot each technology's data as a stacked bar
+    for i, tech in enumerate(technologies):
+        values = data_sorted.loc[tech].values[1:]  # Exclude the first column which is the technology name
+        ax.bar(years, values, label=tech, bottom=bottom, color=colors[tech])
+        bottom += values  # Update the bottom for the next technology
 
-    plt.legend(fontsize=10, bbox_to_anchor=(1.05, 1), loc='upper left')
-    plt.savefig("C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\Mid-Term Presentation\\Storage_and_Conversion_Levels_Over_Time_Europe.png", format='png', bbox_inches='tight')
+    # Customize the plot
+    ax.set_title('Energy by Technology over Years')
+    ax.set_xlabel('Years')
+    ax.set_ylabel('Energy (TWh)')
+    ax.legend(title='Technology', bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.xticks(years)  # Use integer labels on x-axis
+    plt.tight_layout()
+    # Show plot
+    plt.savefig("C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\plot_tests\\1_Energy")
 
-storage_data = r1.get_full_ts("storage_level")
-storage_data = storage_data.reset_index()
+def plot_stacked_power(data):
+    num_years = len(data.columns) - 1  # Number of years is determined by the number of columns minus 1 (excluding 'technology')
+    num_technologies = len(data)  # Number of technologies
 
-conversion_data = r1.get_full_ts("flow_conversion_output")
-conversion_data = conversion_data.reset_index()
+    # Sort technologies based on their total energy values in the last year (or any year of choice)
+    data_sorted = data.sort_values(by=data.columns[-1], axis=0, ascending=True)
 
-plt.figure(figsize=(14, 8))
-plot_storage_levels_all_regions(storage_data, regions, storage_technologies)
-plot_conversion_levels_all_regions(conversion_data, regions, conversion_technologies)
+    # Plot stacked bars
+    fig, ax = plt.subplots(figsize=(12, 8))
+
+    # Prepare data for plotting
+    years = np.arange(num_years)  # Use integers for the x-axis
+    technologies = data_sorted.index  # Technologies sorted by total energy values
+
+    # Initialize bottom array for stacked bar plot
+    bottom = np.zeros(num_years)
+
+    # Plot each technology's data as a stacked bar
+    for i, tech in enumerate(technologies):
+        values = data_sorted.loc[tech].values[1:]  # Exclude the first column which is the technology name
+        ax.bar(years, values, label=tech, bottom=bottom, color=colors[tech])
+        bottom += values  # Update the bottom for the next technology
+
+    # Customize the plot
+    ax.set_title('Power by Technology over Years')
+    ax.set_xlabel('Years')
+    ax.set_ylabel('Power (TW)')
+    ax.legend(title='Technology', bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.xticks(years)  # Use integer labels on x-axis
+    plt.tight_layout()
+    # Show plot
+    plt.savefig("C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\plot_tests\\1_Power")
+
+# Plot stacked bar chart for energy data
+plot_stacked_energy(data_1_energy_filtered)
+plot_stacked_power(data_1_power_filtered)

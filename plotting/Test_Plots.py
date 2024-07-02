@@ -1,8 +1,52 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-battery_capacities = [1895.660994063559, 1266.7246940871096, 2355.9550329609974,1400.711801020117,1632.8159422367958, 2844.3719489602095]
-time_steps = [1000, 800, 400, 80, 72, 4380]
+# Provided data
+installed_battery_energy_capacities = [1.895660994063559, 1.2667246940871096, 2.3559550329609974, 1.400711801020117, 1.6328159422367958, 2.8443719489602095, 0.8007480579013488,
+                                       2.581884447468497, 2.581884447468497, 3.0451920636379855, 1.5336799827347043]
+time_steps = [1000, 800, 400, 80, 72, 4380, 100, 2000,3000,6000,8760]
+
+# Plotting the data as a scatter plot
+plt.figure(figsize=(10, 6))
+plt.scatter(time_steps, installed_battery_energy_capacities, color='b', label='Installed Capacity')
+
+# Adding title and labels
+plt.title('Installed Battery Energy Capacities Over Time Steps')
+plt.xlabel('Time Steps')
+plt.ylabel('Installed Battery Energy Capacity (TWh)')
+plt.legend()
+plt.grid(True)
+
+# Display the plot
+plt.show()
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Provided data
+installed_battery_power_capacities = [0.34340603558962505, 0.21331998615219487,
+                                       0.14502107743315875, 0.16066099634396886,
+                                       0.6173959631300573, 0.09005729100899161,
+                                       0.8007480579013488,
+                                       0.4950679051726866, 0.4950679051726866,
+                                       0.6437273364029385, 0.3132161880280894]
+time_steps = [1000, 800, 400, 80, 72, 4380, 100, 2000,3000,6000,8760]
+
+# Plotting the data as a scatter plot
+plt.figure(figsize=(10, 6))
+plt.scatter(time_steps, installed_battery_power_capacities, color='b', label='Installed Capacity')
+
+# Adding title and labels
+plt.title('Installed Battery Power Capacities Over Time Steps')
+plt.xlabel('Time Steps')
+plt.ylabel('Installed Battery Power Capacity (TWh)')
+plt.legend()
+plt.grid(True)
+
+# Display the plot
+plt.show()
+
+
 """import matplotlib.pyplot as plt
 import numpy as np
 

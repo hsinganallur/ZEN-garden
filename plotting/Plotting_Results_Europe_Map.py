@@ -11,7 +11,7 @@ regions = {
     'Eastern Europe': ['BG', 'CZ', 'HU', 'PL', 'RO', 'SK']
 }
 
-out_folder1 = "C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Simulations\\Results\\Vanilla_PI_FB_No_Power_Lines_Green_4_Test_1000"
+out_folder1 = "C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Simulations\\Results\\Vanilla_PI_FB_No_Power_Lines_Green_4_Test_8760"
 r1 = Results(out_folder1)
 data_1 = r1.get_total("capacity")
 data_1 = data_1.reset_index()

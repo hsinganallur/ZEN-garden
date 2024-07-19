@@ -1,4 +1,157 @@
-import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+# Given values
+year_start = 2022
+value_start = 1400
+year_end = 2050
+value_end = 700
+
+# Number of years
+years = np.arange(year_start, year_end + 1)
+
+# Generate exponential data
+values = np.logspace(np.log10(value_start), np.log10(value_end), len(years))
+
+# Create DataFrame
+data = pd.DataFrame({'Year': years, 'Value': values})
+
+# Display the DataFrame
+print(data)
+
+
+"""import matplotlib.pyplot as plt
+import numpy as np
+
+# Data provided
+data = [
+    ('biomass_plant', 'power', 'DE', 0.001984),
+    ('hard_coal_plant', 'power', 'DE', 0.013054),
+    ('lignite_coal_plant', 'power', 'AT', 0.003648),
+    ('lignite_coal_plant', 'power', 'CH', 0.003774),
+    ('lignite_coal_plant', 'power', 'DE', 0.027838),
+    ('natural_gas_turbine', 'power', 'DE', 0.011386),
+    ('nuclear', 'power', 'CH', 0.00219),
+    ('nuclear', 'power', 'DE', 0.006615),
+    ('photovoltaics', 'power', 'AT', 0.002742),
+    ('photovoltaics', 'power', 'CH', 0.003646),
+    ('photovoltaics', 'power', 'DE', 0.061051),
+    ('reservoir_hydro', 'power', 'AT', 0.001859),
+    ('reservoir_hydro', 'power', 'CH', 0.006701),
+    ('run-of-river_hydro', 'power', 'AT', 0.003256),
+    ('run-of-river_hydro', 'power', 'CH', 0.003156),
+    ('wind_offshore', 'power', 'DE', 0.007682),
+    ('wind_onshore', 'power', 'AT', 0.002863),
+    ('wind_onshore', 'power', 'DE', 0.053814),
+    ('pumped_hydro', 'power', 'AT', 0.005843),
+    ('pumped_hydro', 'power', 'CH', 0.004681),
+    ('pumped_hydro', 'power', 'DE', 0.004997)
+]
+
+# Colors for each technology
+color_map = {
+    "biomass_plant": 'springgreen',
+    "hard_coal_plant": 'firebrick',
+    "lignite_coal_plant": 'chocolate',
+    "natural_gas_turbine": 'khaki',
+    "nuclear": 'slateblue',
+    "photovoltaics": 'orange',
+    "reservoir_hydro": 'skyblue',
+    "run-of-river_hydro": 'deepskyblue',
+    "wind_offshore": 'aquamarine',
+    "wind_onshore": 'deeppink',
+    "pumped_hydro": 'cadetblue'
+}
+
+# Extracting data for each country
+countries = ['AT', 'DE', 'CH']
+technologies = []
+values = {country: [] for country in countries}
+
+for tech, _, country, value in data:
+    if tech not in technologies:
+        technologies.append(tech)
+    values[country].append(value)
+
+# Plotting
+fig, ax = plt.subplots(figsize=(10, 6))
+
+# Width of the bars
+bar_width = 0.35
+index = np.arange(len(countries))
+
+# Plot each technology as a stacked bar
+bottom = np.zeros(len(countries))
+
+for i, tech in enumerate(technologies):
+    tech_values = [values[country][i] if i < len(values[country]) else 0 for country in countries]
+    ax.bar(index, tech_values, bar_width, label=tech, bottom=bottom, color=color_map.get(tech, 'gray'))
+    bottom += tech_values
+
+ax.set_xlabel('Countries')
+ax.set_ylabel('Power (TW)')
+ax.set_title('Power Generation by Technology and Country')
+ax.set_xticks(index)
+ax.set_xticklabels(countries)
+ax.legend()
+
+# Adjusting Y-axis limits
+ax.set_ylim(0, 0.3)  # Adjust this limit as per your requirement
+
+plt.tight_layout()
+plt.show()
+
+# Data provided for energy generation
+energy_data = [
+    ('pumped_hydro', 'energy', 'AT', 0.105854),
+    ('pumped_hydro', 'energy', 'CH', 0.0848),
+    ('pumped_hydro', 'energy', 'DE', 0.025284)
+]
+
+# Colors for each technology (reuse the previous color map for consistency)
+color_map = {
+    "pumped_hydro": 'cadetblue'
+}
+
+# Extracting data for each country
+countries = ['AT', 'DE', 'CH']
+technologies = []
+energy_values = {country: [] for country in countries}
+
+for tech, _, country, value in energy_data:
+    if tech not in technologies:
+        technologies.append(tech)
+    energy_values[country].append(value)
+
+# Plotting energy data
+fig, ax = plt.subplots(figsize=(10, 6))
+
+# Width of the bars
+bar_width = 0.35
+index = np.arange(len(countries))
+
+# Plot each technology as a stacked bar
+bottom = np.zeros(len(countries))
+
+for i, tech in enumerate(technologies):
+    tech_values = [energy_values[country][i] if i < len(energy_values[country]) else 0 for country in countries]
+    ax.bar(index, tech_values, bar_width, label=tech, bottom=bottom, color=color_map.get(tech, 'gray'))
+    bottom += tech_values
+
+ax.set_xlabel('Countries')
+ax.set_ylabel('Energy')
+ax.set_title('Energy Generation by Technology and Country')
+ax.set_xticks(index)
+ax.set_xticklabels(countries)
+ax.legend()
+
+# Adjusting Y-axis limits
+ax.set_ylim(0, 0.3)  # Adjust this limit as per your requirement
+
+plt.tight_layout()
+plt.show()"""
+
+"""import matplotlib.pyplot as plt
 import numpy as np
 
 # Provided data
@@ -45,7 +198,7 @@ plt.grid(True)
 
 # Display the plot
 plt.show()
-
+"""
 
 """import matplotlib.pyplot as plt
 import numpy as np

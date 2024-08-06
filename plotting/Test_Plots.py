@@ -1,4 +1,102 @@
-import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Load the additional data for detailed contributions
+opex_split = pd.read_csv('C:\\Users\\Hareesh S P\\Downloads\\data_opex_split.csv')
+capex_split = pd.read_csv('C:\\Users\\Hareesh S P\\Downloads\\data_capex_split.csv')
+carrier_split = pd.read_csv("C:\\Users\\Hareesh S P\\Downloads\\data_carrier_split.csv")
+
+# Convert all values to billions by dividing by 1000
+opex_split.iloc[:, 1:] /= 1000
+capex_split.iloc[:, 1:] /= 1000
+carrier_split.iloc[:, 1:] /= 1000
+
+# Define the color mapping for technologies
+tech_colors = {
+    "DAC": 'aqua',
+    "biomass_boiler": 'darkseagreen',
+    "biomass_boiler_DH": 'lightseagreen',
+    "biomass_plant": 'springgreen',
+    "biomass_plant_CCS": 'mediumseagreen',
+    "carbon_storage": 'limegreen',
+    "district_heating_grid": 'lime',
+    "electrode_boiler": 'mediumspringgreen',
+    "electrode_boiler_DH": 'darkgreen',
+    "hard_coal_boiler": 'brown',
+    "hard_coal_boiler_DH": 'darkred',
+    "hard_coal_plant": 'firebrick',
+    "hard_coal_plant_CCS": 'maroon',
+    "heat_pump": 'yellowgreen',
+    "heat_pump_DH": 'olive',
+    "lignite_coal_plant": 'chocolate',
+    "lng_terminal": 'peru',
+    "natural_gas_boiler": 'darkgoldenrod',
+    "natural_gas_boiler_DH": 'goldenrod',
+    "natural_gas_turbine": 'khaki',
+    "natural_gas_turbine_CCS": 'gold',
+    "nuclear": 'slateblue',
+    "oil_boiler": 'orangered',
+    "oil_boiler_DH": 'coral',
+    "oil_plant": 'tomato',
+    "photovoltaics": 'orange',
+    "reservoir_hydro": 'skyblue',
+    "run-of-river_hydro": 'deepskyblue',
+    "waste_boiler_DH": 'lightblue',
+    "waste_plant": 'powderblue',
+    "wind_offshore": 'aquamarine',
+    "wind_onshore": 'deeppink',
+    "battery": 'darkslategray',
+    "hydrogen_storage": 'teal',
+    "natural_gas_storage": 'darkturquoise',
+    "pumped_hydro": 'cadetblue',
+    "carbon_pipeline": 'lightsteelblue',
+    "natural_gas_pipeline": 'steelblue',
+    "power_line": 'darkslateblue',
+    "vanadium_redox_flow_battery": 'mediumblue',
+    "up_redox_flow_battery_1": 'blue',
+    "up_redox_flow_battery_2": 'royalblue',
+    "up_redox_flow_battery_3": 'cornflowerblue',
+    "up_redox_flow_battery_4": 'lightblue',
+    "up_redox_flow_battery_5": 'powderblue'
+}
+
+# Plotting setup
+fig, ax = plt.subplots(figsize=(14, 8))
+
+# Plot OPEX contributions
+bottom_opex = pd.Series([0]*len(opex_split), index=opex_split.index)
+for tech in opex_split.columns[1:]:
+    color = tech_colors.get(tech, None)
+    ax.bar(opex_split['Year'], opex_split[tech], bottom=bottom_opex, label=f'OPEX: {tech}', color=color)
+    bottom_opex += opex_split[tech]
+
+# Plot CAPEX contributions
+bottom_capex = pd.Series([0]*len(capex_split), index=capex_split.index)
+for tech in capex_split.columns[1:]:
+    color = tech_colors.get(tech, None)
+    ax.bar(capex_split['Year'], capex_split[tech], bottom=bottom_capex, label=f'CAPEX: {tech}', color=color)
+    bottom_capex += capex_split[tech]
+
+# Plot Carrier contributions
+bottom_carrier = pd.Series([0]*len(carrier_split), index=carrier_split.index)
+for carrier in carrier_split.columns[1:]:
+    ax.bar(carrier_split['Year'], carrier_split[carrier], bottom=bottom_carrier, label=f'Carrier: {carrier}')
+    bottom_carrier += carrier_split[carrier]
+
+# Final adjustments
+ax.legend(loc='upper left', bbox_to_anchor=(1, 1))
+ax.set_xlabel('Year')
+ax.set_ylabel('Cost (Billion Euros)')
+ax.set_title('Stacked Costs by Year with Detailed Contributions')
+plt.tight_layout()
+
+# Save or display the plot
+plt.show()  # You can use plt.savefig('filename.png') to save the plot
+
+
+
+
+"""import numpy as np
 import pandas as pd
 
 # Given values
@@ -18,7 +116,7 @@ data = pd.DataFrame({'Year': years, 'Value': values})
 
 # Display the DataFrame
 print(data)
-
+"""
 
 """import matplotlib.pyplot as plt
 import numpy as np

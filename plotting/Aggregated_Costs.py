@@ -1,14 +1,13 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-import dask.dataframe as dd
 from zen_garden.postprocess.results.results import Results
 
 # Define your base folder path as a variable
-base_folder = "C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Simulations\\T_18\\Results"
+base_folder = "C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Simulations\\T_28\\Results"
 
 # Change this variable to the desired folder name
-folder_name = "VPI_2024_25_8760"
+folder_name = "PI_HSP_FB_EP"
 out_folder1 = f"{base_folder}\\{folder_name}"
 r = Results(out_folder1)
 
@@ -61,7 +60,12 @@ color_map= {
     "up_redox_flow_battery_5": 'powderblue'
 }
 
-# Costs
+# Total Costs
+data_capex_total = r.get_total("cost_capex_total")
+data_opex_total = r.get_total("cost_opex_total")
+data_carrier_total = r.get_total("cost_carrier_total")
+
+
 data_carbon_emissions = r.get_df("cost_carbon_emissions_total")
 
 data_capex_split = r.get_df("cost_capex")
@@ -73,6 +77,7 @@ data_capex_split = series_capex.reset_index()
 data_capex_split.columns = ['technology', 'capacity_type', 'location', 'year', 'value']
 data_capex_split.drop(columns=['capacity_type', 'location','year'], inplace=True)
 columns_to_check_capex = data_capex_split.columns.difference(['year', 'technology', 'capacity_type', 'location'])
+data_capex_split = data_capex_split.groupby('technology').sum()
 
 data_opex_split = r.get_df("cost_opex")
 # Convert the dictionary to a Series
@@ -81,9 +86,8 @@ series_opex = pd.Series(data_opex_split['none'])
 data_opex_split = series_opex.reset_index()
 # Rename the columns
 data_opex_split.columns = ['technology', 'location', 'time', 'value']
-
 data_opex_split.drop(columns=['location','time'], inplace=True)
-
+data_opex_split = data_opex_split.groupby('technology').sum()
 
 data_carrier_split = r.get_df("cost_carrier")
 # Convert the dictionary to a Series
@@ -94,6 +98,18 @@ data_carrier_split = series_carrier.reset_index()
 data_carrier_split.columns = ['carrier', 'node', 'time', 'value']
 data_carrier_split.drop(columns=['node' , 'time'], inplace=True)
 columns_to_check_carrier = data_carrier_split.columns.difference(['year', 'technology', 'capacity_type', 'location'])
+data_carrier_split = data_carrier_split.groupby('carrier').sum()
 
 # Shed Demand
 data_shed_demand = r.get_total("cost_shed_demand").groupby('carrier').sum()
+
+# Define the threshold
+threshold = 10**-6
+# For data_capex_split
+data_capex_split = data_capex_split[data_capex_split['value'] >= threshold]
+# For data_opex_split
+data_opex_split = data_opex_split[data_opex_split['value'] >= threshold]
+# For data_carrier_split
+data_carrier_split = data_carrier_split[data_carrier_split['value'] >= threshold]
+
+a=1

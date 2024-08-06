@@ -4,10 +4,10 @@ import numpy as np
 from zen_garden.postprocess.results.results import Results
 
 # Define your base folder path as a variable
-base_folder = "C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Simulations\\T_21\\Results"
+base_folder = "C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Simulations\\T_28\\Results"
 
 # Change this variable to the desired folder name
-folder_name = "VPI_2025_25_4380_All_Cost_Variations_Conversions"
+folder_name = "PI_HSP_FB_EP"
 out_folder1 = f"{base_folder}\\{folder_name}"
 r = Results(out_folder1)
 

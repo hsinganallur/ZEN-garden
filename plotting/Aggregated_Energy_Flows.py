@@ -4,10 +4,10 @@ import numpy as np
 from zen_garden.postprocess.results.results import Results
 
 # Define your base folder path as a variable
-base_folder = "C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Simulations\\T_21\\Results"
+base_folder = "C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Simulations\\T_28\\Results"
 
 # Change this variable to the desired folder name
-folder_name = "VPI_2025_25_4380_All_Cost_Variations_Conversions"
+folder_name = "PI_HSP_FB_EP"
 out_folder1 = f"{base_folder}\\{folder_name}"
 r = Results(out_folder1)
 
@@ -140,7 +140,7 @@ all_data_n = all_data_n / 1000
 cumulative_data_n = all_data_n.cumsum(axis=1)
 
 # Load demand data
-demand_path = 'C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Simulations\\T_21\\Results\\demand.csv'  # Update this path as needed
+demand_path = 'C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Simulations\\T_28\\Results\\demand.csv'  # Update this path as needed
 demand_data = pd.read_csv(demand_path)
 
 # Extract the "Demand(TWh)" column
@@ -158,7 +158,7 @@ cumulative_data_p.plot(kind='area', ax=ax, linewidth=2, color=[color_map.get(x, 
 ax.plot(demand_twh.index, demand_twh, color='black', linewidth=2, label='Demand')
 
 # Adjusting Y-axis limits
-ax.set_ylim(-5, 10)
+ax.set_ylim(-1, 5)
 
 # Set plot labels and title
 ax.set_xlabel('Time')

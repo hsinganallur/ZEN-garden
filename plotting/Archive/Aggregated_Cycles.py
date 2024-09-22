@@ -4,10 +4,10 @@ import numpy as np
 from zen_garden.postprocess.results.results import Results
 
 # Define your base folder path as a variable
-base_folder = "C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Simulations\\T_28\\Results"
+base_folder = "C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Simulations\\T_29\\Results"
 
 # Change this variable to the desired folder name
-folder_name = "PI_HSP_FB_EP"
+folder_name = "PI_HSP_FB_No_EP_50CE"
 out_folder1 = f"{base_folder}\\{folder_name}"
 r = Results(out_folder1)
 
@@ -84,10 +84,16 @@ data_cycles_reset = data_cycles.reset_index()
 # Filter data_cycles to keep only technologies present in data_1_energy_filtered
 technologies_in_energy = data_1_energy_filtered.index
 data_cycles_filtered = data_cycles_reset[data_cycles_reset['technology'].isin(technologies_in_energy)]
-# Plotting cycles of operation by technology
+
+
+output_data_path = out_folder1 + "\\data_1_cycles_filtered.csv"
+data_cycles_filtered.to_csv(output_data_path)
+
+"""# Plotting cycles of operation by technology
 fig, ax = plt.subplots(figsize=(14, 8))
 technologies = data_cycles_filtered['technology']
 cycles = data_cycles_filtered.iloc[:, 1:].values.flatten()  # exclude the 'technology' column
+
 # Creating a bar plot
 ax.bar(technologies, cycles, color=[color_map.get(x, 'gray') for x in technologies])
 # Adding labels and title
@@ -98,4 +104,4 @@ plt.xticks(rotation=0)
 plt.tight_layout()
 # Save the plot
 output_path = out_folder1 + "\\Cycles_of_operation_bar_plot.png"
-plt.savefig(output_path)
+plt.savefig(output_path)"""

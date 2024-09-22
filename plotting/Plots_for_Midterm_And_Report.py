@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib as mpl
 import numpy as np
 
-#RES Plot
+"""#RES Plot
 # Load the world map
 world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
 
@@ -51,8 +51,8 @@ ax.set_axis_off()
 ax.set_xlim(-10, 40)  # Adjust these values to fit the zoom level you want
 ax.set_ylim(30, 83)   # Adjust these values to fit the zoom level you want
 
-plt.savefig("C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\Mid-Term Presentation\\RES_Map.png")
-
+plt.savefig("C:\\Users\\Hareesh S P\\Documents\\MT_Images\\RES_Map.png")
+"""
 # Mckinsey Plot
 # Data
 years = [2025, 2030, 2035, 2040]
@@ -66,12 +66,13 @@ plt.figure(figsize=(10, 6))
 bars = plt.bar(years, capacity, color=colors, width=3)
 
 # Adding labels and title
-plt.xlabel('Year',fontsize=15)
-plt.ylabel('Installed Energy Capacity (TWh)', fontsize=15)
-plt.title('Predicted Cumulative LDES Installations', fontsize=15)
+plt.xlabel('Year',fontsize=15, fontweight='bold')
+plt.ylabel('Installed Energy Capacity (TWh)', fontsize=15, fontweight='bold')
+plt.title('Predicted Cumulative LDES Installations', fontsize=15, fontweight='bold')
 
 # Setting x-axis to display only specified years
-plt.xticks(years, fontsize=15)
+plt.xticks(years, fontsize=15, fontweight='bold')
+plt.yticks([0, 50, 100, 150], fontsize=15, fontweight='bold')
 
 # Setting y-axis limit
 plt.ylim(0, 160)
@@ -83,19 +84,22 @@ for bar in bars:
              ha='center', va='bottom', fontsize=15, fontweight='bold', color='black')
 
 # Save the plot
-plt.savefig("C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\Mid-Term Presentation\\Mckinsey_plot.png")
+plt.savefig("C:\\Users\\Hareesh S P\\Documents\\MT_Images\\Mckinsey_plot.png")
 
 #Generate Energy Supply Demand Profile
+
+import numpy as np
+import matplotlib.pyplot as plt
 
 # Time values
 time = np.linspace(0, 24, 1000)
 
-# Simulating energy demand and supply curves
+# Simulating energy demand and supply curves with additional variation
 demand = 50 + 20 * np.sin(2 * np.pi * time / 24)  # Simulated demand curve
-supply = 40 + 10 * np.sin(2 * np.pi * (time / 24 + 0.5))  # Simulated supply curve shifted
+supply = 40 + 10 * np.sin(2 * np.pi * (time / 24 + 0.5)) + 5 * np.sin(4 * np.pi * time / 24)  # Simulated supply with added variation
 
 # Plotting
-plt.figure(figsize=(10, 6))
+plt.figure(figsize=(20, 6))
 
 # Plot demand and supply
 plt.plot(time, demand, label='Demand', color='brown', linewidth=2)
@@ -113,13 +117,18 @@ plt.xticks([])
 plt.yticks([])
 
 # Adding labels and title
-plt.xlabel('Time', fontsize=15)
-plt.ylabel('Energy', fontsize=15)
-plt.title('Energy Demand and Supply Mismatch', fontsize=15)
-plt.legend()
+plt.xlabel('Time', fontsize=15, fontweight='bold')
+plt.ylabel('Energy', fontsize=15, fontweight='bold')
+#plt.title('Energy Demand and Supply Mismatch', fontsize=15)
 
-# SaVE Plot
-plt.savefig('C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\Mid-Term Presentation\\power_supply_demand.png')
+# Place the legend outside the plot area
+plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=15)
+
+# Save Plot
+plt.savefig('C:\\Users\\Hareesh S P\\Documents\\MT_Images\\power_supply_demand.png')
+
+# Show plot
+plt.show()
 
 
 

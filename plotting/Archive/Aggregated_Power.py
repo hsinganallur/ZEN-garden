@@ -4,10 +4,10 @@ import numpy as np
 from zen_garden.postprocess.results.results import Results
 
 # Define your base folder path as a variable
-base_folder = "C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Simulations\\T_28\\Results"
+base_folder = "C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Simulations\\T_44 (SD + LD Tests)\\Results"
 
 # Change this variable to the desired folder name
-folder_name = "PI_HSP_FB_EP"
+folder_name = "PI_HSP_FB_100P100E_LD_SD"
 out_folder1 = f"{base_folder}\\{folder_name}"
 r = Results(out_folder1)
 
@@ -67,21 +67,24 @@ columns_to_check = data_1.columns.difference(['year', 'technology', 'capacity_ty
 
 # Power_Totals
 # Filter rows where capacity_type is 'power' and technology is in a specified list
-technologies_to_keep = ['biomass_plant_CCS', 'biomass_plant', 'hard_coal_plant','hard_coal_plant_CCS',
+"""technologies_to_keep = ['biomass_plant_CCS', 'biomass_plant', 'hard_coal_plant','hard_coal_plant_CCS',
                         'lignite_coal_plant', 'natural_gas_turbine', 'natural_gas_turbine_CCS', 'nuclear',
                         'oil_plant', 'photovoltaics','reservoir_hydro', 'run-of-river_hydro',
                         'waste_plant', 'wind_offshore', 'wind_onshore', 'battery',
                         'hydrogen_storage', 'pumped_hydro', 'vanadium_redox_flow_battery', "up_redox_flow_battery_1",
-                        "up_redox_flow_battery_2", "up_redox_flow_battery_3", "up_redox_flow_battery_4", "up_redox_flow_battery_5"]
-data_1_power = data_1[(data_1['capacity_type'] == 'power') & (data_1['technology'].isin(technologies_to_keep))]
+                        "up_redox_flow_battery_2", "up_redox_flow_battery_3", "up_redox_flow_battery_4", "up_redox_flow_battery_5"]"""
+data_1_power = data_1[(data_1['capacity_type'] == 'power')]
 # Filter data greater than 1
-data_1_power_filtered = data_1_power[(data_1_power[columns_to_check] > 1).any(axis=1)].dropna()
+data_1_power_filtered = data_1_power[(data_1_power[columns_to_check] > 0.001).any(axis=1)].dropna()
 # Divide by 1000 - TW
 data_1_power_filtered[columns_to_check] /= 1000
 data_1_power_filtered = data_1_power_filtered.groupby('technology').sum()
 data_1_power_filtered.drop(columns=['capacity_type', 'location'], inplace=True)
+output_data_path = out_folder1 + "\\data_1_power_filtered.csv"
+data_1_power_filtered.to_csv(output_data_path)
+
 # Rename the second column to 'summed_value'
-data_1_power_filtered.columns = [str(year) for year in range(2025, 2051)]
+"""data_1_power_filtered.columns = [str(year) for year in range(2025, 2051)]
 # Sort the data by the summed value in ascending order
 # Define the list of columns to sort by
 columns_to_sort_by_p = [str(year) for year in range(2025, 2051)]
@@ -99,4 +102,4 @@ plt.xticks(rotation=0)
 plt.tight_layout()
 # Save the plot
 output_path = out_folder1 + "\\Installed_power_stacked_bar_plot.png"
-plt.savefig(output_path)
+plt.savefig(output_path)"""

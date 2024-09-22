@@ -1,4 +1,360 @@
-import pandas as pd
+
+"""import pandas as pd
+import matplotlib.pyplot as plt
+import os
+
+
+# Function to calculate total system costs
+def calculate_total_system_costs(file_paths):
+    all_costs = []
+
+    # Iterate through each file path
+    for path in file_paths:
+        # Read in the capex, opex, and carrier cost files
+        capex_file = os.path.join(path, 'data_capex_total.csv')
+        opex_file = os.path.join(path, 'data_opex_total.csv')
+        carrier_file = os.path.join(path, 'data_carrier_total.csv')
+
+        capex_total = pd.read_csv(capex_file)
+        opex_total = pd.read_csv(opex_file)
+        carrier_total = pd.read_csv(carrier_file)
+
+        # Merge the data on the 'year' column
+        merged_df = pd.merge(capex_total, opex_total, on='year')
+        merged_df = pd.merge(merged_df, carrier_total, on='year')
+
+        # Calculate the total system cost in billions
+        merged_df['total_system_cost'] = (merged_df['cost_capex_total'] +
+                                          merged_df['cost_opex_total'] +
+                                          merged_df['cost_carrier_total']) / 1000
+
+        # Append to the list
+        all_costs.append(merged_df['total_system_cost'])
+
+    # Create a DataFrame and return it
+    costs_df = pd.DataFrame(all_costs).T
+    costs_df['average_system_cost'] = costs_df.mean(axis=1)
+
+    return costs_df
+
+
+# Define file paths for both simulations
+baseline_folder = "00_Extreme_Pessimistic"
+file_paths_1 = [
+    fr"C:\Users\Hareesh S P\Documents\MT_Offline\MT_Simulations\{baseline_folder}\Results\PI_HSP_FB_50PE_U1",
+    fr"C:\Users\Hareesh S P\Documents\MT_Offline\MT_Simulations\{baseline_folder}\Results\PI_HSP_FB_50PE_U2",
+    fr"C:\Users\Hareesh S P\Documents\MT_Offline\MT_Simulations\{baseline_folder}\Results\PI_HSP_FB_50PE_U3",
+    fr"C:\Users\Hareesh S P\Documents\MT_Offline\MT_Simulations\{baseline_folder}\Results\PI_HSP_FB_50PE_U4",
+    fr"C:\Users\Hareesh S P\Documents\MT_Offline\MT_Simulations\{baseline_folder}\Results\PI_HSP_FB_50PE_U5",
+    fr"C:\Users\Hareesh S P\Documents\MT_Offline\MT_Simulations\{baseline_folder}\Results\PI_HSP_FB_50PE_U6",
+    fr"C:\Users\Hareesh S P\Documents\MT_Offline\MT_Simulations\{baseline_folder}\Results\PI_HSP_FB_50PE_U7",
+    fr"C:\Users\Hareesh S P\Documents\MT_Offline\MT_Simulations\{baseline_folder}\Results\PI_HSP_FB_50PE_U8"
+]
+
+file_paths_2 = [
+     fr"C:\Users\Hareesh S P\Documents\MT_Offline\MT_Simulations\{baseline_folder}\Results\PI_HSP_FB_100PE_U1",
+    fr"C:\Users\Hareesh S P\Documents\MT_Offline\MT_Simulations\{baseline_folder}\Results\PI_HSP_FB_100PE_U2",
+    fr"C:\Users\Hareesh S P\Documents\MT_Offline\MT_Simulations\{baseline_folder}\Results\PI_HSP_FB_100PE_U3",
+    fr"C:\Users\Hareesh S P\Documents\MT_Offline\MT_Simulations\{baseline_folder}\Results\PI_HSP_FB_100PE_U4",
+    fr"C:\Users\Hareesh S P\Documents\MT_Offline\MT_Simulations\{baseline_folder}\Results\PI_HSP_FB_100PE_U5",
+    fr"C:\Users\Hareesh S P\Documents\MT_Offline\MT_Simulations\{baseline_folder}\Results\PI_HSP_FB_100PE_U6",
+    fr"C:\Users\Hareesh S P\Documents\MT_Offline\MT_Simulations\{baseline_folder}\Results\PI_HSP_FB_100PE_U7",
+    fr"C:\Users\Hareesh S P\Documents\MT_Offline\MT_Simulations\{baseline_folder}\Results\PI_HSP_FB_100PE_U8"
+]
+
+# Calculate total system costs for both sets of file paths
+costs_df_1 = calculate_total_system_costs(file_paths_1)
+costs_df_2 = calculate_total_system_costs(file_paths_2)
+
+# Specify the file path
+file_path_1 = fr"C:\Users\Hareesh S P\Documents\MT_Offline\MT_Simulations\{baseline_folder}\Results\system_cost_average_plot_50PE.xlsx"
+file_path_2 = fr"C:\Users\Hareesh S P\Documents\MT_Offline\MT_Simulations\{baseline_folder}\Results\system_cost_average_plot_100PE.xlsx"
+
+# Save the DataFrame to the specified location
+costs_df_1.to_excel(file_path_1, index=False)
+costs_df_2.to_excel(file_path_2, index=False)
+
+# Update the year labels for the X-axis
+year_labels = {0: 2025, 1: 2030, 2: 2035, 3: 2040, 4: 2045, 5: 2050}
+
+# Plot the averaged results for both sets
+plt.figure(figsize=(10, 6))
+plt.plot(costs_df_1.index, costs_df_1['average_system_cost'], marker='o', linestyle='-', label='Total Costs 50%', color='b')
+plt.plot(costs_df_2.index, costs_df_2['average_system_cost'], marker='o', linestyle='-', label='Total Costs 100%', color='r')
+
+# Set labels and ticks with size 15 and bold
+plt.xlabel('Year', fontsize=15, fontweight='bold')
+plt.ylabel('Billions of Euros', fontsize=15, fontweight='bold')
+plt.xticks(ticks=costs_df_1.index, labels=[year_labels.get(year, year) for year in costs_df_1.index], fontsize=15,
+           fontweight='bold')
+plt.yticks(fontsize=15, fontweight='bold')
+
+# Set Y-axis limit
+plt.ylim(0, 501)
+
+# Display grid and legend
+plt.grid(False)
+#plt.legend(fontsize=15)
+# Add legend outside the plot
+#plt.legend(loc="upper left", bbox_to_anchor=(1, 1))
+
+# Define the path to save the figure
+save_path = fr"C:Users\Hareesh S P\Documents\MT_Offline\MT_Simulations\{baseline_folder}\Results\system_cost_average_plot.png"
+
+# Save the plot as a PNG file
+plt.savefig(save_path)
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Labels for the x-axis
+labels = ['LiB', 'HS', 'PH', 'VRFB', 'UPMRFB']
+
+# Efficiency values as horizontal lines or regions
+efficiency_values = {
+    'LiB': (95, 100),     # Solid line at 95-100%
+    'HS': (60, 65),       # Solid line at 60-65%
+    'PH': (80, 85),       # Solid line at 80-85%
+    'VRFB': (70, 80),     # Dashed line with a band from 70-80%
+    'UPMRFB': (75, 85),   # Dashed line with a band from 75-85%
+}
+
+# Colors for each category
+colors = {
+    'LiB': 'cyan',
+    'HS': 'coral',
+    'PH': 'darkblue',
+    'VRFB': 'lightcoral',
+    'UPMRFB': 'yellow'
+}
+
+# Create a figure and axis
+fig, ax = plt.subplots()
+
+# Plot solid lines for LiB, HS, and PH
+for i, label in enumerate(labels[:3]):
+    ax.hlines(np.mean(efficiency_values[label]), i, i+1, colors=colors[label], linewidth=5)
+
+# Plot regions for VRFB and UPMRFB with dashed lines
+for i, label in enumerate(labels[3:]):
+    i += 3  # Offset for VRFB and UPMRFB
+    ax.fill_between([i-0.2, i+0.2], efficiency_values[label][0], efficiency_values[label][1], color=colors[label], alpha=0.5)
+    ax.hlines(np.mean(efficiency_values[label]), i-0.2, i+0.2, colors='red', linestyles='--', linewidth=2)
+
+# Customize the plot
+ax.set_xticks(np.arange(len(labels)))
+ax.set_xticklabels(labels, rotation=45)
+ax.set_ylim(0, 100)
+ax.set_ylabel('Efficiency (%)')
+ax.set_title('Efficiency (%)')
+
+# Display the plot
+plt.tight_layout()
+plt.show()
+"""
+"""import pandas as pd
+import matplotlib.pyplot as plt
+
+# Load the new spreadsheet
+file_path = 'C:\\Users\\Hareesh S P\\Documents\\MT_Images\\Pie_Map_Extreme_Optimistic.xlsx'  # Update with your new file path
+xls = pd.ExcelFile(file_path)
+
+# Define the technologies and colors
+technologies = ['battery', 'hydrogen_storage', 'pumped_hydro_storage', 'up_devices']
+colors = ['dodgerblue', 'forestgreen', 'orange', 'tomato']
+
+# Define a function to create pie charts without zeros and with bold text
+def plot_pie_with_bold_text(ax, values, colors):
+    non_zero_values = values[values > 0]
+    non_zero_colors = [color for value, color in zip(values, colors) if value > 0]
+    ax.pie(non_zero_values, labels=None, autopct='%1.1f%%', startangle=140, colors=non_zero_colors,
+           textprops={'fontsize': 20, 'fontweight': 'bold'})
+
+# Load the sheets
+df_0_8h = pd.read_excel(xls, sheet_name='Discharge_Time(0-8h)')
+df_8_20h = pd.read_excel(xls, sheet_name='Discharge_Time(8-20h)')
+df_50_150h = pd.read_excel(xls, sheet_name='Discharge_Time(50-150h)')
+
+# Extract values for the charts
+values_100_0_8h = df_0_8h[df_0_8h['Percentage_of_total_costs_(%)'] == 100][technologies].iloc[0]
+values_75_0_8h = df_0_8h[df_0_8h['Percentage_of_total_costs_(%)'] == 75][technologies].iloc[0]
+values_50_0_8h = df_0_8h[df_0_8h['Percentage_of_total_costs_(%)'] == 50][technologies].iloc[0]
+values_25_0_8h = df_0_8h[df_0_8h['Percentage_of_total_costs_(%)'] == 25][technologies].iloc[0]
+
+values_100_8_20h = df_8_20h[df_8_20h['Percentage_of_total_costs_(%)'] == 100][technologies].iloc[0]
+values_75_8_20h = df_8_20h[df_8_20h['Percentage_of_total_costs_(%)'] == 75][technologies].iloc[0]
+values_50_8_20h = df_8_20h[df_8_20h['Percentage_of_total_costs_(%)'] == 50][technologies].iloc[0]
+values_25_8_20h = df_8_20h[df_8_20h['Percentage_of_total_costs_(%)'] == 25][technologies].iloc[0]
+
+values_100_50_150h = df_50_150h[df_50_150h['Percentage_of_total_costs_(%)'] == 100][technologies].iloc[0]
+values_75_50_150h = df_50_150h[df_50_150h['Percentage_of_total_costs_(%)'] == 75][technologies].iloc[0]
+values_50_50_150h = df_50_150h[df_50_150h['Percentage_of_total_costs_(%)'] == 50][technologies].iloc[0]
+values_25_50_150h = df_50_150h[df_50_150h['Percentage_of_total_costs_(%)'] == 25][technologies].iloc[0]
+
+# Create the figure with subplots
+fig, axs = plt.subplots(4, 3, figsize=(24, 24))
+
+# Plot for the first sheet (0-8h)
+plot_pie_with_bold_text(axs[0, 0], values_100_0_8h, colors)
+plot_pie_with_bold_text(axs[1, 0], values_75_0_8h, colors)
+plot_pie_with_bold_text(axs[2, 0], values_50_0_8h, colors)
+plot_pie_with_bold_text(axs[3, 0], values_25_0_8h, colors)
+
+# Plot for the second sheet (8-20h)
+plot_pie_with_bold_text(axs[0, 1], values_100_8_20h, colors)
+plot_pie_with_bold_text(axs[1, 1], values_75_8_20h, colors)
+plot_pie_with_bold_text(axs[2, 1], values_50_8_20h, colors)
+plot_pie_with_bold_text(axs[3, 1], values_25_8_20h, colors)
+
+# Plot for the third sheet (50-150h)
+plot_pie_with_bold_text(axs[0, 2], values_100_50_150h, colors)
+plot_pie_with_bold_text(axs[1, 2], values_75_50_150h, colors)
+plot_pie_with_bold_text(axs[2, 2], values_50_50_150h, colors)
+plot_pie_with_bold_text(axs[3, 2], values_25_50_150h, colors)
+
+# Add horizontal axis labels (Discharge Time Ranges)
+for i, label in enumerate(['0-8h', '8-20h', '50-150h']):
+    axs[3, i].set_xlabel(f'Discharge Time Range: ({label})', fontsize=20, fontweight='bold')
+
+# Add vertical axis labels (Percentage of Total Costs)
+for i, label in enumerate(['100%', '75%', '50%', '25%']):
+    axs[i, 0].set_ylabel(f'Percentage of Total Costs: {label}', fontsize=20, fontweight='bold')
+
+plt.tight_layout()
+plt.show()
+"""
+"""import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import os
+
+# Load your Excel file
+file_path = 'C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Simulations\\T_52_Plots_Pumped_Hydro\\Power_TW_VF.xlsx'
+
+# Extract the directory where the Excel file is located
+save_directory = os.path.dirname(file_path)
+
+# Read the Excel file
+df = pd.read_excel(file_path, sheet_name='Tabelle1')
+
+# Convert necessary columns to numeric
+technologies = ['Hydrogen', 'Pumped_Hydro_Storage', 'Lithium_Ion_Battery',
+                'UPMRFB1', 'UPMRFB2', 'UPMRFB3', 'UPMRFB4', 'UPMRFB5',
+                'UPMRFB6', 'UPMRFB7', 'UPMRFB8']
+df[technologies + ['Discharge_Time_(h)']] = df[technologies + ['Discharge_Time_(h)']].apply(pd.to_numeric, errors='coerce')
+
+# Define the percentages you want to plot
+percentages = [12.5, 25, 50, 75, 100]
+
+# Set the upper limit for all figures based on the maximum value across all technologies
+y_max = df[technologies].max().max()
+
+# Define distinct colors
+colors = ['#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231',
+          '#911eb4', '#42d4f4', '#f032e6', '#bfef45', '#fabebe',
+          '#469990']
+
+# Create the plots and save each one as a PNG file in the same location as the Excel file
+for percentage in percentages:
+    subset = df[df['Percentage_of_total_costs_(%)'] == percentage]
+
+    # Interpolate the data
+    subset_interpolated = subset.set_index('Discharge_Time_(h)').interpolate(method='linear')
+
+    # Filter out technologies with all zero values in the subset
+    active_technologies = [tech for tech in technologies if subset_interpolated[tech].sum() > 0]
+    active_colors = colors[:len(active_technologies)]  # Get corresponding colors for active technologies
+
+    # Plot the data
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.stackplot(subset_interpolated.index,
+                 [subset_interpolated[tech] for tech in active_technologies],
+                 labels=active_technologies, colors=active_colors)
+
+    # Set the upper limit for y-axis
+    ax.set_ylim(0, y_max)
+
+    # Labeling the plot
+    ax.set_title(f'Energy Storage Technologies for {percentage}% UPMRFB Cost')
+    ax.set_xlabel('Discharge Time (h)')
+    ax.set_ylabel('Power (TW)')
+
+    # Position the legend outside the plot and only include active technologies
+    ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+
+    # Adjust layout to make space for the legend
+    plt.tight_layout(rect=[0, 0, 0.85, 1])
+
+    # Construct the file path where the plot will be saved
+    file_name = f'area_plot_{percentage}.png'
+    save_path = os.path.join(save_directory, file_name)
+
+    # Save the figure as a PNG file
+    plt.savefig(save_path)
+
+    # Close the plot to avoid overlap in the next iteration
+    plt.close()
+
+print(f"Plots saved successfully in {save_directory}!")
+"""
+
+"""import pandas as pd
+import matplotlib.pyplot as plt
+
+# Data setup
+data_dict = {
+    "technology": ["battery", "hydrogen_storage", "pumped_hydro", "up_redox_flow_battery_2", "up_redox_flow_battery_8"],
+    "2025": [1.92E-09, 2.59E-08, 0.706133545, 4.31E-05, 2.21E-08],
+    "2030": [8.65E-09, 5.88E-08, 0.657839518, 0.068087514, 3.36E-08],
+    "2035": [0.011267179, 0.036384866, 0.591095802, 0.172126639, 5.59E-08],
+    "2040": [0.145027093, 3.051622779, 0.534460094, 0.172126647, 1.37E-07],
+    "2045": [0.258334456, 6.854208901, 0.48633137, 0.190795115, 0.539505794],
+    "2050": [0.160382398, 6.854208905, 0.456828187, 0.213673667, 4.588341272]
+}
+
+# Create DataFrame
+df = pd.DataFrame(data_dict)
+
+# Define colors for each technology
+colors = {
+    "battery": 'darkslategray',
+    "hydrogen_storage": 'teal',
+    "pumped_hydro": 'cadetblue',
+    "up_redox_flow_battery_2": 'royalblue',
+    "up_redox_flow_battery_8": 'lightsteelblue'
+}
+
+# Extract years and technologies
+years = df.columns[1:]
+technologies = df['technology']
+
+# Create a figure for the plot with y-axis limit set to 12 TWh
+fig, ax = plt.subplots(figsize=(12, 6))
+
+# Plotting the stacked bar plot for each year
+for year in years:
+    sorted_data = df.sort_values(by=year)
+    bottom = 0
+    for tech in sorted_data['technology']:
+        capacity = sorted_data[sorted_data['technology'] == tech][year].values[0]
+        ax.bar(year, capacity, bottom=bottom, color=colors.get(tech, 'gray'), label=tech if year == years[0] else "")
+        bottom += capacity
+
+# Setting y-axis limit
+ax.set_ylim(0, 12)
+
+# Adding legend and labels
+handles, labels = ax.get_legend_handles_labels()
+by_label = dict(zip(labels, handles))
+plt.legend(by_label.values(), by_label.keys(), bbox_to_anchor=(1.05, 1), loc='upper left')
+ax.set_xlabel('Years')
+ax.set_ylabel('Installed Energy Capacities (TWh)')
+ax.set_title('Installed Energy Capacities by Technology Over Time')
+
+# Display the plot with the updated title
+plt.tight_layout()
+plt.show()"""
+"""import pandas as pd
 import matplotlib.pyplot as plt
 
 # Load the additional data for detailed contributions
@@ -93,8 +449,7 @@ plt.tight_layout()
 # Save or display the plot
 plt.show()  # You can use plt.savefig('filename.png') to save the plot
 
-
-
+"""
 
 """import numpy as np
 import pandas as pd

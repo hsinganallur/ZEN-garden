@@ -4,10 +4,10 @@ import numpy as np
 from zen_garden.postprocess.results.results import Results
 
 # Define your base folder path as a variable
-base_folder = "C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Simulations\\T_28\\Results"
+base_folder = "C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Simulations\\T_44 (SD + LD Tests)\\Results"
 
 # Change this variable to the desired folder name
-folder_name = "PI_HSP_FB_EP"
+folder_name = "PI_HSP_FB_100P100E_LD_SD"
 out_folder1 = f"{base_folder}\\{folder_name}"
 r = Results(out_folder1)
 
@@ -76,8 +76,11 @@ data_1_energy_filtered[columns_to_check] /= 1000
 data_1_energy_filtered = data_1_energy_filtered.groupby('technology').sum()
 data_1_energy_filtered.drop(columns=['capacity_type', 'location'], inplace=True)
 data_1_energy_filtered.drop(labels=['natural_gas_storage'], axis=0, inplace=True)
+output_data_path = out_folder1 + "\\data_1_energy_filtered.csv"
+data_1_energy_filtered.to_csv(output_data_path)
+
 # Rename the second column to 'summed_value'
-data_1_energy_filtered.columns = [str(year) for year in range(2025, 2051)]
+"""data_1_energy_filtered.columns = [str(year) for year in range(2025, 2051)]
 # Sort the data by the summed value in ascending order
 # Define the list of columns to sort by
 columns_to_sort_by_e = [str(year) for year in range(2025, 2051)]
@@ -94,4 +97,4 @@ plt.xticks(rotation=0)
 plt.tight_layout()
 # Save the plot
 output_path = out_folder1 + "\\Installed_energy_stacked_bar_plot.png"
-plt.savefig(output_path)
+plt.savefig(output_path)"""

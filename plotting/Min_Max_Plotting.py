@@ -1,5 +1,206 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import os
+
+# Set the directory path where the images will be saved
+save_dir = r'C:\Users\Hareesh S P\Documents\MT_Offline\MT_Images'
+os.makedirs(save_dir, exist_ok=True)  # Ensure the directory exists
+
+# Updated data for all technologies
+updated_data = {
+    'Type': ['LiB', 'Hydrogen', 'Pumped Hydro', 'VRFB', 'UPMRFB1', 'UPMRFB2', 'UPMRFB3', 'UPMRFB4', 'UPMRFB5',
+             'UPMRFB6', 'UPMRFB7', 'UPMRFB8'],
+    'Sum of Costs per Unit of Power (€/kW/lifetime)': [18.7869, 27.8637, 19.6087, 17.9001, 8.4675, 3.9015, 1.5199,
+                                                       1.4007, 1.1667, 1.3758, 2.2810, 3.3826],
+    'Round Trip Efficiency (%)': [86.0, 40.0, 78.0, 77.5, 85.0, 70.0, 76.67, 85.0, 81.67, 70.0, 70.0, 70.0],
+    'Self Discharge (%/day)': [0.024, 0.0, 0.0, 0.002, 0.0, 0.0, 0.002, 0.0, 0.002, 0.002, 0.002, 0.002],
+    'Sum of Costs per Unit of Energy (€ /kWh/lifetime)': [19.1108, 0.1160, 1.3796, 16.34, 21.7235, 14.1700, 9.5780,
+                                                          10.2790, 8.8775, 6.9970, 6.5100, 6.3195]
+}
+
+# Extracting data for UPMRFB devices and other technologies separately for plotting
+upmrfb_devices_power = updated_data['Sum of Costs per Unit of Power (€/kW/lifetime)'][4:]
+upmrfb_devices_efficiency = updated_data['Round Trip Efficiency (%)'][4:]
+upmrfb_devices_discharge = updated_data['Self Discharge (%/day)'][4:]
+upmrfb_devices_energy = updated_data['Sum of Costs per Unit of Energy (€ /kWh/lifetime)'][4:]
+
+# Labels updated for the plot
+labels_updated = ['LiB', 'Hydrogen', 'Pumped Hydro', 'VRFB', 'UPMRFB']
+
+# Color map for the updated labels
+color_map_updated = {
+    'LiB': 'dodgerblue',
+    'Hydrogen': 'forestgreen',
+    'Pumped Hydro': 'orange',
+    'VRFB': 'pink',
+    'UPMRFB': 'tomato'
+}
+
+# Edge color map for thicker borders
+edge_color_map = {
+    'LiB': 'dodgerblue',
+    'Hydrogen': 'forestgreen',
+    'VRFB': 'pink',
+    'Pumped Hydro': 'orange'
+}
+
+
+# Function to create the plots with font adjustments and no X-axis labels, and save the figures
+def create_min_max_plot_with_upmrfb_no_x_labels_and_save(data, labels, ylabel, title, color_map, edge_color_map,
+                                                         upmrfb_devices, file_name, edge_thickness=8, y_limit=None,
+                                                         font_size=15, font_weight='bold'):
+    plt.figure(figsize=(10, 6))
+
+    # Calculate min and max for each dataset
+    min_values = [min(d) if isinstance(d, tuple) else d for d in data]
+    max_values = [max(d) if isinstance(d, tuple) else d for d in data]
+
+    # Calculate positions for the labels
+    positions = np.arange(len(labels)) + 1
+
+    # Plot min and max values as bars with thicker edges for selected technologies
+    for pos, min_val, max_val, label in zip(positions, min_values, max_values, labels):
+        color = color_map[label]
+        edge_color = edge_color_map.get(label, 'black') if label in edge_color_map else None
+        plt.bar(pos, max_val - min_val, bottom=min_val, color=color, edgecolor=edge_color,
+                linewidth=edge_thickness if edge_color else 0)
+
+        # If it's UPMRFB, plot the devices with dotted purple lines
+        if label == 'UPMRFB':
+            for device_value in upmrfb_devices:
+                plt.plot([pos - 0.4, pos + 0.4], [device_value, device_value], color='purple', linestyle='--',
+                         linewidth=2)
+
+    if y_limit:
+        plt.ylim(y_limit)
+
+    # Update title and labels with font size and weight
+    plt.title(title, fontsize=font_size, fontweight=font_weight)
+    plt.ylabel(ylabel, fontsize=font_size, fontweight=font_weight)
+
+    # Remove X-axis labels
+    #plt.xticks(positions, [''] * len(labels), rotation=45, ha='right', fontsize=font_size, fontweight=font_weight)
+    plt.xticks(positions, labels, rotation=0, ha='center', fontsize=font_size, fontweight=font_weight)
+    plt.yticks(fontsize=font_size, fontweight=font_weight)
+
+    plt.tight_layout()
+
+    # Save the plot
+    save_path = os.path.join(save_dir, file_name)
+    plt.savefig(save_path, format='png')
+    plt.close()
+
+
+# Generating and saving the plots
+
+# "Sum of Costs per Unit of Power"
+create_min_max_plot_with_upmrfb_no_x_labels_and_save(
+    updated_data['Sum of Costs per Unit of Power (€/kW/lifetime)'][:4] + [(1.1667, 8.4675)], labels_updated,
+    'Sum of Costs per Unit of Power (€/kW/lifetime)', 'Sum of Costs per Unit of Power (€ /kW/lifetime)',
+    color_map_updated, edge_color_map, upmrfb_devices_power, 'sum_costs_power.png', y_limit=(0, 40))
+
+# "Round Trip Efficiency (%)"
+create_min_max_plot_with_upmrfb_no_x_labels_and_save(updated_data['Round Trip Efficiency (%)'][:4] + [(70.0, 85.0)],
+                                                     labels_updated, 'Round Trip Efficiency (%)',
+                                                     'Round Trip Efficiency (%)', color_map_updated, edge_color_map,
+                                                     upmrfb_devices_efficiency, 'round_trip_efficiency.png',
+                                                     y_limit=(0, 100))
+
+# "Self Discharge (%/day)"
+create_min_max_plot_with_upmrfb_no_x_labels_and_save(updated_data['Self Discharge (%/day)'][:4] + [(0.0, 0.002)],
+                                                     labels_updated, 'Self Discharge (%/day)', 'Self Discharge (%/day)',
+                                                     color_map_updated, edge_color_map, upmrfb_devices_discharge,
+                                                     'self_discharge.png', y_limit=(0, 0.05))
+
+# "Sum of Costs per Unit of Energy"
+create_min_max_plot_with_upmrfb_no_x_labels_and_save(
+    updated_data['Sum of Costs per Unit of Energy (€ /kWh/lifetime)'][:4] + [(6.1395, 21.7235)], labels_updated,
+    'Sum of Costs per Unit of Energy (€ /kWh/lifetime)', 'Sum of Costs per Unit of Energy (€ /kWh/lifetime)',
+    color_map_updated, edge_color_map, upmrfb_devices_energy, 'sum_costs_energy.png', y_limit=(0, 40))
+
+"""import matplotlib.pyplot as plt
+import numpy as np
+
+# Updated data for all technologies, including the new values for LiB, Hydrogen, Pumped Hydro, VRFB, and UPMRFB devices
+updated_data = {
+    'Type': ['LiB', 'Hydrogen', 'Pumped Hydro', 'VRFB', 'UPMRFB1', 'UPMRFB2', 'UPMRFB3', 'UPMRFB4', 'UPMRFB5', 'UPMRFB6', 'UPMRFB7', 'UPMRFB8'],
+    'Sum of Costs per Unit of Power (€/kW/lifetime)': [18.7869, 27.8637, 19.6087, 17.9001, 8.4675, 3.9015, 1.5199, 1.4007, 1.1667, 1.3758, 2.2810, 3.3826],
+    'Round Trip Efficiency (%)': [86.0, 40.0, 78.0, 77.5, 85.0, 70.0, 76.67, 85.0, 81.67, 70.0, 70.0, 70.0],
+    'Self Discharge (%/day)': [0.024, 0.0, 0.0, 0.002, 0.0, 0.0, 0.002, 0.0, 0.002, 0.002, 0.002, 0.002],
+    'Sum of Costs per Unit of Energy (€ /kWh/lifetime)': [19.1108, 0.1160, 1.3796, 16.34, 21.7235, 14.1700, 9.5780, 10.2790, 8.8775, 6.9970, 6.5100, 6.3195]
+}
+
+# Extracting data for UPMRFB devices and other technologies separately for plotting
+upmrfb_devices_power = updated_data['Sum of Costs per Unit of Power (€/kW/lifetime)'][4:]
+upmrfb_devices_efficiency = updated_data['Round Trip Efficiency (%)'][4:]
+upmrfb_devices_discharge = updated_data['Self Discharge (%/day)'][4:]
+upmrfb_devices_energy = updated_data['Sum of Costs per Unit of Energy (€ /kWh/lifetime)'][4:]
+
+# Labels updated for the plot
+labels_updated = ['LiB', 'Hydrogen', 'Pumped Hydro', 'VRFB', 'UPMRFB']
+
+# Color map for the updated labels
+color_map_updated = {
+    'LiB': 'dodgerblue',
+    'Hydrogen': 'forestgreen',
+    'Pumped Hydro': 'orange',
+    'VRFB': 'pink',
+    'UPMRFB': 'tomato'
+}
+
+# Edge color map for thicker borders
+edge_color_map = {
+    'LiB': 'dodgerblue',
+    'Hydrogen': 'forestgreen',
+    'VRFB': 'pink',
+    'Pumped Hydro': 'orange'
+}
+
+# Function to create the plots with dotted lines for UPMRFB devices
+def create_min_max_plot_with_upmrfb_dotted(data, labels, ylabel, title, color_map, edge_color_map, upmrfb_devices, edge_thickness=8, y_limit=None):
+    plt.figure(figsize=(10, 6))
+
+    # Calculate min and max for each dataset
+    min_values = [min(d) if isinstance(d, tuple) else d for d in data]
+    max_values = [max(d) if isinstance(d, tuple) else d for d in data]
+
+    # Calculate positions for the labels
+    positions = np.arange(len(labels)) + 1
+
+    # Plot min and max values as bars with thicker edges for selected technologies
+    for pos, min_val, max_val, label in zip(positions, min_values, max_values, labels):
+        color = color_map[label]
+        edge_color = edge_color_map.get(label, 'black') if label in edge_color_map else None
+        plt.bar(pos, max_val - min_val, bottom=min_val, color=color, edgecolor=edge_color, linewidth=edge_thickness if edge_color else 0)
+
+        # If it's UPMRFB, plot the devices with dotted purple lines
+        if label == 'UPMRFB':
+            for device_value in upmrfb_devices:
+                plt.plot([pos - 0.4, pos + 0.4], [device_value, device_value], color='purple', linestyle='--', linewidth=2)
+
+    if y_limit:
+        plt.ylim(y_limit)
+
+    plt.title(title)
+    plt.ylabel(ylabel)
+    plt.xticks(positions, labels, rotation=45, ha='right')  # Rotate labels and adjust alignment
+    plt.tight_layout()
+    plt.show()
+
+# Generating the plot for "Sum of Costs per Unit of Power" with updated data
+create_min_max_plot_with_upmrfb_dotted(updated_data['Sum of Costs per Unit of Power (€/kW/lifetime)'][:4] + [(1.1667, 8.4675)], labels_updated, 'Sum of Costs per Unit of Power (€/kW/lifetime)', 'Sum of Costs per Unit of Power (€ /kW/lifetime)', color_map_updated, edge_color_map, upmrfb_devices_power, y_limit=(0, 40))
+
+# Generating the plot for "Round Trip Efficiency (%)" with updated data
+create_min_max_plot_with_upmrfb_dotted(updated_data['Round Trip Efficiency (%)'][:4] + [(70.0, 85.0)], labels_updated, 'Round Trip Efficiency (%)', 'Round Trip Efficiency (%)', color_map_updated, edge_color_map, upmrfb_devices_efficiency, y_limit=(0, 100))
+
+# Generating the plot for "Self Discharge (%/day)" with updated data
+create_min_max_plot_with_upmrfb_dotted(updated_data['Self Discharge (%/day)'][:4] + [(0.0, 0.002)], labels_updated, 'Self Discharge (%/day)', 'Self Discharge (%/day)', color_map_updated, edge_color_map, upmrfb_devices_discharge, y_limit=(0, 0.05))
+
+# Generating the plot for "Sum of Costs per Unit of Energy" with updated data
+create_min_max_plot_with_upmrfb_dotted(updated_data['Sum of Costs per Unit of Energy (€ /kWh/lifetime)'][:4] + [(6.1395, 21.7235)], labels_updated, 'Sum of Costs per Unit of Energy (€ /kWh/lifetime)', 'Sum of Costs per Unit of Energy (€ /kWh/lifetime)', color_map_updated, edge_color_map, upmrfb_devices_energy, y_limit=(0, 40))"""
+
+"""import matplotlib.pyplot as plt
+import numpy as np
 
 
 def create_min_max_plot(data, labels, ylabel, title, file_path, color_map):
@@ -137,7 +338,7 @@ def calculate_sum_and_ratios():
 sum_capex_opex_fixed, sum_opex_capex_var_energy, efficiency_charge_div_lifetime, self_discharge_div_lifetime = calculate_sum_and_ratios()
 
 # Common parameters for all plots
-file_prefix = 'C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\Mid-Term Presentation\\min_max_plot_energy_storage_'
+file_prefix = 'C:\\Users\\Hareesh S P\\Documents\\MT_Images\\min_max_plot_energy_storage_'
 new_ylabels = [
     'Sum of costs per unit of power (€/kW)',
     'Sum of costs per unit of energy (€/kWh)',
@@ -155,8 +356,8 @@ for i, (data, y_label) in enumerate(zip(new_data_sets, new_ylabels)):
     create_min_max_plot(data, labels, y_label, title, file_path, color_map)
 
 # Generate and save legend
-legend_file_path = 'C:\\Users\\Hareesh S P\\OneDrive - Unbound Potential GmbH\\MasterThesis\\Results\\Mid-Term Presentation\\legend.png'
-create_legend_image(legend_file_path, color_map)
+legend_file_path = "C:\\Users\\Hareesh S P\\Documents\\MT_Images\\legend.png"
+create_legend_image(legend_file_path, color_map)"""
 
 """import matplotlib.pyplot as plt
 import numpy as np
